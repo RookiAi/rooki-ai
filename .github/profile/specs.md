@@ -97,13 +97,13 @@ metrics_agent = Agent(
 synth_agent = Agent(
   role="Voice Synthesizer",
   goal="Produce schema-valid Voice Guide JSON using metrics and influencers",
-  tools=[TemplateLibraryTool(), JSONSchemaValidatorTool(schema=VoiceGuideSuggestion.schema())],
+  tools=[TemplateLibraryTool(), JSONSchemaValidatorTool(schema=VoiceProfileResponse.schema())],
   verbose=False, memory=False, temperature=0.1
 )
 
 t1 = Task(agent=corpus_agent, description="LoadCorpus", expected_output=CorpusOut)
 t2 = Task(agent=metrics_agent, description="ComputeStyleMetrics", expected_output=StyleProfile, context=[t1])
-t3 = Task(agent=synth_agent, description="SynthesizeVoiceGuide", expected_output=VoiceGuideSuggestion, context=[t2])
+t3 = Task(agent=synth_agent, description="SynthesizeVoiceGuide", expected_output=VoiceProfileResponse, context=[t2])
 
 voice_profile_crew = Crew(
   agents=[corpus_agent, metrics_agent, synth_agent],
@@ -118,5 +118,5 @@ voice_profile_crew = Crew(
 
 1. **LoadCorpus** → returns `CorpusOut(samples, count, time_range)`
 2. **ComputeStyleMetrics**(CorpusOut, influencers) → returns `StyleProfile`
-3. **SynthesizeVoiceGuide**(StyleProfile, influencers) → returns `VoiceGuideSuggestion` (validated)
-   Return `VoiceGuideSuggestion` as the HTTP 200 payload of `POST /v1/voice/profile`.
+3. **SynthesizeVoiceGuide**(StyleProfile, influencers) → returns `VoiceProfileResponse` (validated)
+   Return `VoiceProfileResponse` as the HTTP 200 payload of `POST /v1/voice/profile`.

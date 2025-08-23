@@ -50,13 +50,9 @@ class StyleProfile(BaseModel):
     engagement_metrics: Dict[str, float]
     content_patterns: Dict[str, List[str]]
 
-    
-class VoiceGuideSuggestion(BaseModel):
-    positioning: str
-    tone: str
-    pillars: List[PillarItem]
-    guardrails: List[GuardrailItem]
-    post_metrics: ContentMetrics
-    reply_metrics: ContentMetrics
-    quoted_metrics: ContentMetrics
-    long_form_text_metrics: ContentMetrics
+
+class VoiceTone(BaseModel):
+    description: str
+    style: str
+    formality: str
+    personality: str

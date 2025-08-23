@@ -35,13 +35,20 @@ compute_metrics_task:
     If influencer metrics are provided, blend them into the analysis with appropriate weights.
   expected_output: "StyleProfile"
   agent: "metrics_agent"
-  context: ["load_corpus_task"]
+
+compute_voices_task:
+  description: >
+    Analyze the provided text samples to compute style metrics. Calculate:
+    1. A positioning statement in the format "For builders who need X, Brand is the Y that delivers Z"
+    2. A tone classification format of VoiceTone
+
+  expected_output: "VoiceTone"
+  agent: "metrics_agent"
 
 synthesize_voice_guide_task:
   description: >
     Create a voice guide suggestion based on the style profile and influencer data. The guide should include:
-    1. A positioning statement in the format "For builders who need X, Brand is the Y that delivers Z"
-    2. A tone classification (direct, helpful, witty, professional, or educational)
+
     3. Content pillars with appropriate weightings in float - you MUST create exactly {pillar} pillars (weights should sum to approximately 1)
     4. Guardrails with "do" and "don't" recommendations:
     - You MUST create EXACTLY {guardrail} guardrails of type "do" (not {guardrail} total, but {guardrail} "do" type)
@@ -52,8 +59,29 @@ synthesize_voice_guide_task:
     - EXACTLY {guardrail} have type="do"
     - EXACTLY {guardrail} have type="dont"
 
-    The output must be schema-valid according to the VoiceGuideSuggestion model. Use the metrics 
+    The output must be schema-valid according to the VoiceProfileResponse model. Use the metrics 
     from the style profile to inform your recommendations.
-  expected_output: "VoiceGuideSuggestion"
+  expected_output: "VoiceProfileResponse"
   agent: "synth_agent"
   context: ["compute_metrics_task"]
+
+route_task:
+  description: >
+    You are the route agent responsible for determining which specialized agent to invoke based on user requests and
+    context. Analyze the user's input and select the appropriate agent to handle the task efficiently. 
+    
+    Determine whether the user is asking for an overview. If so, route to the overview_agent.
+
+    If not, do the following: 
+
+    1. Use the SupabaseDraftsTool to fetch the storage URL for this Twitter handle:
+       drafts = SupabaseDraftsTool(x_handle="{x_handle}")
+
+    2. Then, determine if the user is discussing a specific draft. If so, route to the draft_agent.
+
+    3. If the user is engaging in a general conversation or asking questions, route to the chat_agent.
+
+    There are 3 specialized agents available:
+    1. overview_agent - for high-level summaries and overviews.
+    2. draft_agent - for generating and refining text drafts.
+    3. chat_agent - for conversational tasks and user interactions.

@@ -20,7 +20,7 @@ def run(x_handle: str = "jinglescode"):
         config: Optional configuration dict with pillar and guardrail settings
     
     Returns:
-        VoiceGuideSuggestion object with the generated voice guide
+        VoiceProfileResponse object with the generated voice guide
     """
 
     # Construct inputs for the crew

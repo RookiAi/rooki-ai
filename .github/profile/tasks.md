@@ -38,7 +38,7 @@
   - Output:
 
     ```python
-    class VoiceGuideSuggestion(BaseModel):
+    class VoiceProfileResponse(BaseModel):
         positioning: str
         tone: Literal['direct','helpful','witty','professional','educational']
         pillars: list[dict]  # { pillar: str, weighting: float } (weights sum≈1)

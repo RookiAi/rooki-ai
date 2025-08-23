@@ -9,6 +9,6 @@
    - LLM: not required (pure Python metric tool), or `temperature=0.0` for any heuristic labeling.
    - Tools: `StyleMetricsTool`, `InfluencerMetricsTool` (optional, reads cached metrics file/table).
 3. **SynthAgent**
-   - Goal: Generate the final **VoiceGuideSuggestion** (positioning, tone, pillars+weights, guardrails, templates) using the StyleProfile and influencers. Must produce schema-valid JSON only.
+   - Goal: Generate the final **VoiceProfileResponse** (positioning, tone, pillars+weights, guardrails, templates) using the StyleProfile and influencers. Must produce schema-valid JSON only.
    - LLM: flagship (low temp `0.1`), JSON mode or tool-enforced schema.
    - Tools: `JSONSchemaValidatorTool`, `TemplateLibraryTool` (optional prompt snippets).

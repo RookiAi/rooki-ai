@@ -89,11 +89,7 @@ async def create_voice_profile(
             'guardrail': guardrail,
         }
         
-        # retry_count = 0
-
-        # while retry_count <= MAX_RETRIES:
         try:
-                # if retry_count > 0:
                     result = VoiceProfileCrew().crew().kickoff(inputs=inputs)
                     print(f"Voice guide generated for {request.x_handle}: {result}")
                     if not result:

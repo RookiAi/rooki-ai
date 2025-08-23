@@ -8,7 +8,7 @@ from .voice_profile import (
     GuardrailItem,
     CorpusOut,
     StyleProfile,
-    VoiceGuideSuggestion
+    VoiceTone
 )
 
 __all__ = [
@@ -18,5 +18,5 @@ __all__ = [
     'GuardrailItem',
     'CorpusOut',
     'StyleProfile',
-    'VoiceGuideSuggestion'
+    'VoiceTone'
 ]

@@ -5,16 +5,12 @@ from typing import List
 import os
 
 from rooki_ai.tools import TweetHistoryStorageTool, SupabaseUserTweetsStorageUrlTool, JSONSchemaValidatorTool
-from rooki_ai.models import VoiceGuideSuggestion
-# from rooki_ai.tools import (
-#     JSONLReaderTool, TextNormalizeTool,
-#     StyleMetricsTool, InfluencerMetricsTool,
-#     JSONSchemaValidatorTool, TemplateLibraryTool
-# )
+from rooki_ai.models import VoiceProfileResponse, VoiceTone
 
 def _get_env_var(var_name, default=None):
     """Get environment variable or return default."""
-    return os.environ.get(var_name, default)
+    env = os.environ.get(var_name, default)
+    return env
 
 @CrewBase
 class VoiceProfileCrew():
@@ -49,14 +45,18 @@ class VoiceProfileCrew():
         
         # Tools for synth_agent
         # template_library_tool = TemplateLibraryTool()
-        json_schema_validator_tool = JSONSchemaValidatorTool(
-            schema=VoiceGuideSuggestion.model_json_schema()
+        voice_json_schema_validator_tool = JSONSchemaValidatorTool(
+            schema=VoiceTone.model_json_schema()
+        )
+
+        response_json_schema_validator_tool = JSONSchemaValidatorTool(
+            schema=VoiceProfileResponse.model_json_schema()
         )
         
         return {
             'corpus_agent': [supabase_tool, tweet_history_tool],
-            'metrics_agent': [],
-            'synth_agent': [json_schema_validator_tool]
+            'metrics_agent': [voice_json_schema_validator_tool],
+            'synth_agent': [response_json_schema_validator_tool]
             # 'corpus_agent': [supabase_tool, jsonl_reader_tool, text_normalize_tool],
             # 'metrics_agent': [style_metrics_tool, influencer_metrics_tool],
             # 'synth_agent': [template_library_tool, json_schema_validator_tool]
@@ -96,7 +96,7 @@ class VoiceProfileCrew():
     def fetch_data_task(self) -> Task:
         """Task for fetching data from Supabase."""
         return Task(
-            config=self.tasks_config.get('fetch_data_task', self.tasks_config['load_corpus_task']),
+            config=self.tasks_config['fetch_data_task'],
             expected_output="TweetDataOut",
             description="""
             You are retrieving Twitter data for user {x_handle}.
@@ -176,11 +176,28 @@ class VoiceProfileCrew():
         )
 
     @task
+    def compute_voices_task(self) -> Task:
+        """Task for computing voice metrics from the corpus."""
+        return Task(
+            config=self.tasks_config['compute_voices_task'],
+            expected_output="VoiceTone",
+            description="""
+            You are analyzing the Twitter profile for user {x_handle}.
+            
+            Use the tweet_data that were computed in the previous task.
+            
+            Then validate using: validation_result = JSONSchemaValidatorTool(data=your_voice_tone_suggestion)
+        
+            If validation_result["valid"] is False, fix the errors and validate again until it passes.
+            """
+        )
+
+    @task
     def synthesize_voice_guide_task(self) -> Task:
         """Task for synthesizing the voice guide from style metrics."""
         return Task(
             config=self.tasks_config['synthesize_voice_guide_task'],
-            expected_output="VoiceGuideSuggestion",
+            expected_output="VoiceProfileResponse",
             description="""
             You are analyzing the Twitter profile for user {x_handle}.
             
@@ -208,9 +225,9 @@ class VoiceProfileCrew():
         
             If validation_result["valid"] is False, fix the errors and validate again until it passes.
 
-            The output must strictly follow the VoiceGuideSuggestion schema with these fields:
+            The output must strictly follow the VoiceProfileResponse schema with these fields:
             - positioning: string - A positioning statement in the format "For [audience] who need [need], [brand] is the [category] that delivers [benefit]"
-            - tone: string - One of: "direct", "helpful", "witty", "professional", or "educational"
+            - tone: string - VoiceTone - Use the VoiceTone from the previous task
             - pillars: list of PillarItem - Each with "pillar" (string) and "weighting" (number)
             - guardrails: list of GuardrailItem - Each with "type" ("do" or "dont") and "guardrail" (string)
             - post_metrics: ContentMetrics - Use the post_metrics from the previous task
@@ -230,7 +247,7 @@ class VoiceProfileCrew():
         
         return Crew(
             agents=[self.corpus_agent(), self.metrics_agent(), self.synth_agent()],
-            tasks=[self.fetch_data_task(), self.load_corpus_task(), self.compute_metrics_task(), self.synthesize_voice_guide_task()],
+            tasks=[self.fetch_data_task(), self.load_corpus_task(), self.compute_metrics_task(), self.compute_voices_task(), self.synthesize_voice_guide_task()],
             process=Process.sequential,
             memory=memory,
             max_rpm=max_rpm,

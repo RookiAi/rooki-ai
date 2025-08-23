@@ -25,25 +25,30 @@ def update_voice_config_in_supabase(x_handle: str, positioning: str, tone: str, 
         Exception: If there's an error updating the database
     """
     # Get PostgreSQL connection string from environment variables
+    print("111")
     db_url = os.environ.get("DATABASE_URL")
     
     if not db_url:
         logger.error("DATABASE_URL environment variable not set")
         return False
         
+    print("222")
     try:
         # Connect to the PostgreSQL database
         conn = psycopg2.connect(db_url)
         cursor = conn.cursor()
+        print("333")
         
         # Check if record exists for this x_handle
         check_query = 'SELECT id FROM public."Voice" WHERE x_handle = %s'
         cursor.execute(check_query, (x_handle,))
         existing_record = cursor.fetchone()
+        print("444")
         
         now = datetime.utcnow()
         
         if existing_record:
+            print("555")
             # Update existing record
             update_query = '''
             UPDATE public."Voice" 
@@ -63,12 +68,14 @@ def update_voice_config_in_supabase(x_handle: str, positioning: str, tone: str, 
                     x_handle
                 )
             )
+            print("666")
             logger.info(f"Updated voice config for x_handle: {x_handle}")
         else:
             # Insert new record with a generated UUID
             import uuid
             new_id = str(uuid.uuid4())
             
+            print("777")
             # This assumes there's a default user ID to associate with new records
             # Adjust this as needed for your specific requirements
             default_user_id = os.environ.get("DEFAULT_USER_ID", "system")
@@ -91,6 +98,7 @@ def update_voice_config_in_supabase(x_handle: str, positioning: str, tone: str, 
                     now
                 )
             )
+            print("888")
             logger.info(f"Created new voice config for x_handle: {x_handle}")
         
         # Commit the transaction
