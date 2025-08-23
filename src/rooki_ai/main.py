@@ -14,32 +14,32 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
 
 def run():
-    # user_id = "cmeojlmrc0000y5hgvlfeich6"
+    user_id = "cmeojlmrc0000y5hgvlfeich6"
 
-    # inputs = {
-    #     "user_id": user_id,
-    # }
-
-    # flow = CoachFlow()
-    # flow.plot()
-    # result = flow.kickoff(inputs=inputs)
-
-    # print(f"Generated fun fact: {result}")
-
-    # Construct inputs for the crew
-    x_handle = "jinglescode"
     inputs = {
-        "x_handle": x_handle,
-        "pillar": 3,
-        "guardrail": 3,
+        "user_id": user_id,
     }
 
-    try:
-        result = VoiceProfileCrew().crew().kickoff(inputs=inputs)
-        print(f"Voice guide generated for {x_handle}: {result}")
-        return result
-    except Exception as e:
-        raise Exception(f"An error occurred while running the crew: {e}")
+    flow = CoachFlow()
+    flow.plot()
+    result = flow.kickoff(inputs)
+
+    print(f"Generated fun fact: {result}")
+
+    # Construct inputs for the crew
+    # x_handle = "jinglescode"
+    # inputs = {
+    #     "x_handle": x_handle,
+    #     "pillar": 3,
+    #     "guardrail": 3,
+    # }
+
+    # try:
+    #     result = VoiceProfileCrew().crew().kickoff(inputs=inputs)
+    #     print(f"Voice guide generated for {x_handle}: {result}")
+    #     return result
+    # except Exception as e:
+    #     raise Exception(f"An error occurred while running the crew: {e}")
 
 
 def train():

@@ -1,6 +1,7 @@
 from crewai.flow.flow import Flow, listen, start
 from dotenv import load_dotenv
 from litellm import completion
+from pydantic import BaseModel, Field
 
 from rooki_ai.crews import RouteCrew
 from rooki_ai.models.api import StandupCoachResponse
@@ -9,24 +10,31 @@ from rooki_ai.utils.get_chat_background import get_chat_background
 load_dotenv()
 
 
-class CoachFlow(Flow):
+class CoachState(BaseModel):
+    user_id: str | None = None
+
+
+class CoachFlow(Flow[CoachState]):
     model = "gpt-4o-mini"
 
     @start()
-    def identify_route(self, inputs=None):
+    def identify_route(self):
         print("Starting flow")
-        # Each flow state automatically gets a unique ID
-        print(f"Flow State ID: {self.state['id']}")
-        print(f"Inputs: {inputs}")
 
-        # Extract user_id from inputs dictionary
-        user_id = inputs.get("user_id") if inputs and isinstance(inputs, dict) else None
+        # works with typed state
+        flow_id = getattr(self.state, "id", None)
+        print(f"Flow State ID: {flow_id}")
+
+        # inputs passed to kickoff(...) are merged into state
+        user_id = getattr(self.state, "user_id", None)
         print(f"Using user_id: {user_id}")
 
         chat_background = get_chat_background(user_id)
         print(f"Chat background: {chat_background}")
 
-        route = RouteCrew().crew().kickoff(inputs=chat_background)
+        # Include user_id in the inputs passed to RouteCrew
+        crew_inputs = {"user_id": user_id, **chat_background}
+        route = RouteCrew().crew().kickoff(inputs=crew_inputs)
         route_with_context = {"context": chat_background, "route": route}
 
         return route_with_context

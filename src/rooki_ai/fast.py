@@ -5,7 +5,7 @@ from typing import Dict, Optional
 from fastapi import FastAPI, Header, HTTPException, status
 from pydantic import BaseModel
 
-from rooki_ai.crews.voice_profile import VoiceProfileCrew
+from rooki_ai.crews.voice_profile.voice_profile import VoiceProfileCrew
 from rooki_ai.models import VoiceProfileRequest, VoiceProfileResponse
 from rooki_ai.utils.update_voice_config_in_supabase import (
     update_voice_config_in_supabase,
