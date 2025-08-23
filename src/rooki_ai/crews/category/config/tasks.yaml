@@ -1,16 +1,73 @@
 draft_demo_tweet:
   description: >
-    You are the tweet draft agent responsible for generating or refining a draft tweet based on user input and context.
+    PERSONALIZATION EXPERT TASK: Create a tweet that sounds EXACTLY like it was written by the user themselves.
+
+    STEP 1 - GET VOICE PROFILE:
+    voice_profile = SuperbaseGetVoiceTool(user_id="{user_id}")
     
-    Below is the core content about Rooki, an AI intern for startup founders:
-    - startup founders are busy people, because they are building things that people want, and have no time to manage their social media presence, they dont have time to doom scroll and reply to trending topics related to their business
-    - Rooki is an AI intern that every fast moving startup must hire, Rooki learns the business's Positioning Statement and Tone Characteristics. Rooki can doom scroll for 24 hours identifying key trends and conversations to engage with.
-    - every day Rooki will message you on telegram when there is something important to address to post on social media
-    - you can also email Rooki if you want the intern to write a longterm tweet or change the positioning statement.
+    STEP 2 - QUICK ANALYSIS:
+    Extract exactly 3 DISTINCTIVE features from the profile:
+    - What makes this person's writing unique? (Short phrases, technical terms, specific structures)
+    - What tone do they use? (Aggressive, thoughtful, humorous, professional)
+    - How do they use punctuation and emoji? (Frequency, patterns, preferences)
+    
+    STEP 3 - CRAFT RESPONSE TO USER:
+    The user's message is: "{user_message}"
+    
+    Start your response with a SHORT, DIRECT reply to this message that EXACTLY matches their voice profile.
+    
+    STEP 4 - DRAFT PERSONALIZED TWEET:
+    Create a tweet about Rooki AI that includes these core points:
+    - Startup founders are too busy building products to manage social media
+    - Rooki is an AI intern that monitors trends 24/7
+    - Rooki sends important alerts via Telegram and handles email requests
+    
+    THE TWEET MUST:
+    1. Use vocabulary, syntax and punctuation that PERFECTLY matches their voice profile
+    2. Incorporate their typical sentence length and structure
+    3. Match their emoji usage pattern (frequency and types)
+    4. Address the specific content in "{user_message}"
+    
+    AVOID ALL GENERIC LANGUAGE. Each tweet should be radically different based on the voice profile.
+    If you cannot access the voice profile, respond: "ERROR: Voice profile access failed."
 
-    IMPORTANT: 
-    Your answer must be the complete draft tweet text only, without any additional explanations or formatting. 
-    Return the tweet in point form with line breaks
-
+  temperature: 1.0
+  top_p: 0.98
+  top_k: 40
+  presence_penalty: 0.5
+  frequency_penalty: 0.5
   expected_output: "str"
   agent: "tweet_draft_agent"
+
+refine_demo_tweet:
+  description: >
+    You are the tweet refine agent responsible for refining and improving an existing tweet draft based on user
+    feedback and context.
+    CRITICAL INSTRUCTION - VOICE PROFILE USAGE:
+    1. First, retrieve and print the user's voice profile:
+        voice_profile = SuperbaseGetVoiceTool(user_id="{user_id}")
+        print("DEBUG - Voice Profile Retrieved: " + str(voice_profile))
+
+    2. Analyze this voice profile in detail. Extract specific elements:
+        - Tone characteristics (formal/casual, enthusiastic/reserved)
+        - Writing style (direct/indirect, technical/simple)
+        - Emoji usage patterns
+        - Sentence structure preferences
+        - Any unique quirks or patterns
+
+    3. Before refining, write a brief analysis of how you'll incorporate these elements.
+    4. Refine the following tweet draft to better align with the user's voice profile:
+       "{tweet_draft}"
+    5. Ensure the refined tweet still conveys:
+        - Startup founders are busy building products and don't have time for social media
+        - Rooki is an AI intern that learns the business's voice and monitors trends 24/7
+        - Rooki sends important alerts via Telegram and handles email requests for longer content
+    STRICT REQUIREMENT: Your refined tweet must be UNIQUE and clearly reflect the specific voice profile.
+    DO NOT use generic templates or standard marketing language.
+    DO NOT mention "voice profile" in your response.
+    If you cannot access the voice profile data, say "ERROR: Could not access voice profile
+    data."
+  temperature: 0.7
+  top_p: 0.9
+  expected_output: "str"
+  agent: "tweet_refine_agent"

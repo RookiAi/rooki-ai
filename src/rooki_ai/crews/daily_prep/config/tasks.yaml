@@ -1,29 +1,21 @@
-route_task:
+category_classification_task:
   description: >
-    You are the route agent responsible for determining which specialized agent to invoke based on user requests and
-    context. Analyze the user's input and select the appropriate agent to handle the task efficiently. 
+    Pre-defined categories:
+    1. YC Agents Hackathon
+    2. Open Source
+    3. Startup Founder
+
+    1. For each tweet, classify it into one of the 3 categories you identified.
+    2. For each category, with the help of the identify_top_tweet_task, identify the top 3 tweets with the highest engagement (likes + retweets + replies).
+
+  expected_output: "TopTweets"
+  agent: "category_classification_agent"
+
+identify_top_tweet_task:
+  description: >
+    From the provided list of trending tweets, identify the tweet with the highest engagement.
+    Engagement is defined as the sum of likes, retweets, and replies.
     
-    The user's input to analyze:
-    {user_message}
-
-    Determine whether the user is asking for an overview. If so, route to the overview_agent.
-
-    If not, do the following: 
-
-    1. Then, determine if the user is discussing a specific category in {suggested_categories}. 
-        If no obvious connection or relevance to any category, do not route to the category_agent. And move on to step 3.
-        If yes, route to the category_agent.
-
-    2. If the user is engaging in a general conversation or asking questions, route to the chat_agent.
-
-    There are 3 specialized agents available:
-    1. overview_agent - for high-level summaries and overviews.
-    2. category_agent - for generating and refining text drafts.
-    3. chat_agent - for conversational tasks and user interactions.
-
-    IMPORTANT: Your answer must be EXACTLY ONE of these strings (without quotes or any explanations):
-    overview_agent
-    category_agent
-    chat_agent
-  expected_output: "RouteAnswer"
-  agent: "route_agent"
+    Return the tweet object that has the highest engagement score.
+  expected_output: "TopTweets"
+  agent: "top_tweets_identifier_agent"

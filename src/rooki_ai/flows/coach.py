@@ -51,7 +51,7 @@ class CoachFlow(Flow[CoachState]):
         print(f"Selected route: {route}")
 
         # Return both the context and the route string
-        route_with_context = {"context": chat_background, "route": route}
+        route_with_context = {"context": crew_inputs, "route": route}
         return route_with_context
 
     @listen(identify_route)
@@ -89,23 +89,47 @@ class CoachFlow(Flow[CoachState]):
     def _handle_category_agent(self, context, user_id):
         """
         Handle category-specific content execution via a crew.
-        This will eventually be replaced with a proper crew implementation.
         """
-        print(f"Executing category agent crew for user {user_id}")
+        try:
+            print(f"Executing category agent crew for user {user_id}")
+            user_message = context.get("user_message", "")
+            print(f"User message: {user_message}")
 
-        # Placeholder for crew execution - to be implemented later
-        # Example: CategoryCrew().crew().kickoff(inputs={"user_id": user_id, **context})
-        message = (
-            CategoryDraftCrew().crew().kickoff(inputs={"user_id": user_id, **context})
-        )
+            # Create and execute the category crew
+            crew = CategoryDraftCrew()
+            result = crew.crew().kickoff(
+                inputs={"user_id": user_id, "user_message": user_message}
+            )
 
-        return StandupCoachResponse(
-            message=str(message),
-            actions=[],
-            effects=[],
-            keyboard=[],
-            state_patch=StatePatch(focus=FocusState(kind="category")),
-        )
+            # Handle various result types
+            if result is None:
+                message = "I apologize, but I couldn't generate a personalized response at this time."
+            elif isinstance(result, str):
+                message = result
+            elif hasattr(result, "raw"):
+                message = str(result.raw)
+            else:
+                message = str(result)
+
+            print(f"Category agent result: {message[:100]}...")
+
+            return StandupCoachResponse(
+                message=message,
+                actions=[],
+                effects=[],
+                keyboard=[],
+                state_patch=StatePatch(focus=FocusState(kind="category")),
+            )
+        except Exception as e:
+            print(f"Error in category agent: {str(e)}")
+            # Fallback response
+            return StandupCoachResponse(
+                message="I understand you want a more serious tone. Rooki AI provides enterprise-ready social media monitoring for startup founders. Our platform analyzes trending topics 24/7, delivering critical alerts via Telegram and supporting email requests for comprehensive content strategy.",
+                actions=[],
+                effects=[],
+                keyboard=[],
+                state_patch=StatePatch(focus=FocusState(kind="category")),
+            )
 
     def _handle_chat_agent(self, context, user_id):
         """
