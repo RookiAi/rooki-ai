@@ -54,9 +54,10 @@ class RouteCrew:
             config=self.tasks_config["route_task"],
             expected_output="RouteAnswer",
             description="""
-            You are routing the user request to the appropriate service based on the input parameters.
+            You are routing the user request to the appropriate service based on the user's message and other input parameters.
 
             Use the context provided to determine the best course of action.
+            - User Request: {user_message}
             - User ID: {user_id}
             - {messages}: for the past 50 messages from the chat with user
             - {convo_summary}: the current conversation summary

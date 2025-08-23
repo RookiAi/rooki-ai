@@ -18,6 +18,7 @@ def run():
 
     inputs = {
         "user_id": user_id,
+        "user_message": "What have you done today?",
     }
 
     flow = CoachFlow()

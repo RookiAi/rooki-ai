@@ -79,8 +79,13 @@ class FocusState(BaseModel):
     draft_id: Optional[str] = None
 
 
+class StatePatch(BaseModel):
+    focus: FocusState
+
+
 class StandupCoachResponse(BaseModel):
     message: str
     actions: List[ActionItem]
     effects: List[Union[GeneratedDraftEffect, Dict[str, Any]]]
     keyboard: List[KeyboardButton]
+    state_patch: Optional[StatePatch] = None

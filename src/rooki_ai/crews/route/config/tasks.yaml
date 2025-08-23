@@ -3,6 +3,9 @@ route_task:
     You are the route agent responsible for determining which specialized agent to invoke based on user requests and
     context. Analyze the user's input and select the appropriate agent to handle the task efficiently. 
     
+    The user's input to analyze:
+    {user_message}
+
     Determine whether the user is asking for an overview. If so, route to the overview_agent.
 
     If not, do the following: 
