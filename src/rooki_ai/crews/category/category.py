@@ -100,16 +100,25 @@ class CategoryDraftCrew:
             - Emphasizes 24/7 trend monitoring and important alerts via Telegram
             - Mentions ability to handle longer content requests via email
             - ADAPTS TONE based on user's message and profile
+
+            STEP 4: STRUCTURE YOUR RESPONSE IN TWO PARTS:
             
-            STEP 4: Start your response with a BRIEF acknowledgment of the user's tone request in your own words.
-            Refer to the detected tone but use varied phrasing and natural language. Here is an example:
-            - "Based on your request for a [detected tone] approach, here's a draft:"
-            - "For a more [detected tone] style, consider this:"
-            - "Taking a [detected tone] direction as requested:"
+            PART 1: Write ONE natural language sentence that directly responds to "{user_message}". 
+            This should be a conversational reply as if you're speaking to the user, not an intro to the tweet.
+            Examples:
+            - If they asked for a serious tone: "Professional communication is essential for reaching enterprise clients."
+            - If they asked about a feature: "Rooki's alert system ensures you never miss trending conversations in your industry."
+            
+            PART 2: On a new line, add your tweet suggestion that:
+            - Matches the voice profile characteristics
+            - Follows the tone requested in the user's message
+            - Contains the key points about Rooki from STEP 3
             
             DO NOT use generic templates or standard marketing language.
-            DO NOT use hash tags.
-            Make sure your tweet directly responds to: "{user_message}"
+            DO NOT use hashtags unless they're part of the user's voice profile pattern.
+            DO NOT return a fixed template. Make sure your response is unique and personalized to:
+            1. The user's specific voice profile retrieved from the database
+            2. The specific user message: "{user_message}"
             """,
         )
 
@@ -136,11 +145,21 @@ class CategoryDraftCrew:
             3. If the voice profile contains positioning information, incorporate that into your message
             4. Adapt to any specific guidance on emoji usage, sentence structure, and writing style found in the profile
             
-            Begin your response with a direct reply to the user message:
-            - User message: {user_message}
+            STRUCTURE YOUR RESPONSE IN TWO PARTS:
             
-            Then refine the provided tweet draft to better match the user's voice profile and respond to their message.
+            PART 1: Write ONE natural language sentence that directly responds to "{user_message}". 
+            This should be a conversational reply as if you're speaking to the user, not an intro to the tweet.
+            Examples:
+            - If they asked for a serious tone: "Professional communication is essential for reaching enterprise clients."
+            - If they asked about a feature: "Rooki's alert system ensures you never miss trending conversations in your industry."
             
+            PART 2: On a new line, add your refined tweet suggestion that:
+            - Better matches the voice profile characteristics
+            - More closely follows the tone requested in the user's message
+            - Contains the key points about Rooki mentioned above
+            
+            DO NOT use generic templates or standard marketing language.
+            DO NOT use hashtags unless they're part of the user's voice profile pattern.
             DO NOT return a fixed template. Make sure your response is unique and personalized to:
             1. The user's specific voice profile retrieved from the database
             2. The specific user message: "{user_message}"
@@ -165,5 +184,5 @@ class CategoryDraftCrew:
             )
         except Exception as e:
             print(f"Error creating crew: {str(e)}")
-            # Return a simple string as fallback to prevent failures
-            return "Rooki AI streamlines social media for busy startup founders by monitoring trends 24/7, sending important alerts via Telegram, and handling content creation so you can focus on building your business."
+            # Return a fallback response that includes both parts: natural language + tweet
+            return "Social media management is crucial for startups in today's competitive landscape.\n\nRooki AI streamlines social media for busy startup founders by monitoring trends 24/7, sending important alerts via Telegram, and handling content creation so you can focus on building your business."

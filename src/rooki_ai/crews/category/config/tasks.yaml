@@ -62,10 +62,19 @@ refine_demo_tweet:
         - Startup founders are busy building products and don't have time for social media
         - Rooki is an AI intern that learns the business's voice and monitors trends 24/7
         - Rooki sends important alerts via Telegram and handles email requests for longer content
+
+    Refer to the detected tone but use varied phrasing and natural language. Here is an example:
+    - "Based on your request for a [detected tone] approach, here's a draft:"
+    - "For a more [detected tone] style, consider this:"
+    - "Taking a [detected tone] direction as requested:"
+    
     STRICT REQUIREMENT: Your refined tweet must be UNIQUE and clearly reflect the specific voice profile.
-    DO NOT use generic templates or standard marketing language.
     DO NOT mention "voice profile" in your response.
-    If you cannot access the voice profile data, say "ERROR: Could not access voice profile
+    DO NOT use generic templates or standard marketing language.
+    DO NOT use hash tags.
+    DO NOT return a fixed template. Make sure your response is unique and personalized to:
+    1. The user's specific voice profile retrieved from the database
+    2. The specific user message: "{user_message}"
     data."
   temperature: 0.7
   top_p: 0.9
