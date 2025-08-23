@@ -23,6 +23,16 @@ synthesize_voice_guide_task:
     3. Content pillars with appropriate weightings (weights should sum to approximately 1)  - you MUST create exactly {pillar} pillars (weights should sum to approximately 1)
     4. Guardrails with "do" and "don't" recommendations - you MUST create exactly {guardrail} guardrails
     
+    IMPORTANT FOR METRICS: You MUST follow this specific format for ALL metrics objects:
+    - post_metrics: Analyze with only tweets in posts. ContentMetrics with these EXACT fields:
+      - avg_sentence_len: float - Average sentence length (words per sentence)
+      - imperative_pct: float - Percentage of sentences that use imperative voice (0.0 to 1.0)
+      - emoji_rate: float - Average number of emojis per word
+      
+    - reply_metrics: Analyze with only tweets in replies. ContentMetrics with the SAME EXACT fields
+    - quoted_metrics: Analyze with only tweets in quotes. ContentMetrics with the SAME EXACT fields
+    - long_form_text_metrics: Analyze with only tweets which are longer than 280 characters. ContentMetrics with the SAME EXACT fields
+
     The output must be schema-valid according to the VoiceGuideSuggestion model. Use the metrics 
     from the style profile to inform your recommendations.
   expected_output: "VoiceGuideSuggestion"

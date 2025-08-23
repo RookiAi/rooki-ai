@@ -22,7 +22,7 @@ def run(x_handle: str = "jinglescode"):
     Returns:
         VoiceGuideSuggestion object with the generated voice guide
     """
-        
+
     # Construct inputs for the crew
     inputs = {
         'x_handle': x_handle,

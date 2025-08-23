@@ -1,5 +1,9 @@
 import os
 import httpx
+import re
+import psycopg2
+import asyncio
+import asyncpg
 from typing import Optional
 from crewai.tools import BaseTool
 from pydantic import Field
@@ -17,22 +21,13 @@ class SupabaseUserTweetsStorageUrlTool(BaseTool):
     name: str = "SupabaseUserTweetsStorageUrlTool"
     description: str = "Get tweet storage URL from Supabase for a Twitter handle"
     
-    supabase_url: Optional[str] = Field(
-        default=None, 
-        description="Supabase URL (falls back to SUPABASE_URL env var)"
-    )
-    supabase_key: Optional[str] = Field(
-        default=None,
-        description="Supabase API key (falls back to SUPABASE_KEY env var)"
-    )
-    
     def _get_env_var(self, var_name, default=None):
         """Get environment variable or return default."""
         return os.environ.get(var_name, default)
         
     def _run(self, x_handle: str) -> str:
         """
-        Query Supabase to get the storage_url for a given x_handle.
+        Query Supabase to get the storage_url for a given x_handle using direct PostgreSQL connection.
         
         Args:
             x_handle: The Twitter handle to look up in the voice table
@@ -42,122 +37,86 @@ class SupabaseUserTweetsStorageUrlTool(BaseTool):
             
         Raises:
             ValueError: If no record is found or if credentials are missing
-            Exception: For other errors such as HTTP issues
+            Exception: For other errors such as database connection issues
         """
-        # Get credentials from instance or environment variables in this priority:
-        # 1. Instance variables (if provided during initialization)
-        # 2. Environment variables with standard names
-        # 3. Environment variables with alternative names (for DATABASE_URL)
-        url = self.supabase_url or self._get_env_var("SUPABASE_URL") or self._get_env_var("DATABASE_URL")
-        key = self.supabase_key or self._get_env_var("SUPABASE_KEY") or self._get_env_var("SUPABASE_SERVICE_ROLE_KEY")
-        
-        if not url:
-            raise ValueError("Supabase URL not provided. Set SUPABASE_URL or DATABASE_URL environment variable.")
-        
-        if not key:
-            raise ValueError("Supabase API key not provided. Set SUPABASE_KEY or SUPABASE_SERVICE_ROLE_KEY environment variable.")
-        
-        # Construct the API endpoint for the voice table
-        api_endpoint = f"{url}/rest/v1/voice"
-        
-        # Set up headers for Supabase API
-        headers = {
-            "apikey": key,
-            "Authorization": f"Bearer {key}",
-            "Content-Type": "application/json"
-        }
-        
-        # Query parameters to filter by x_handle
-        params = {
-            "select": "storage_url",
-            "x_handle": f"eq.{x_handle}"
-        }
-        
+        # Get PostgreSQL connection string from environment variables or use default
+        db_url = self._get_env_var("DATABASE_URL")       
+        print(f"Connecting to PostgreSQL database with handle: {x_handle}")
+            
         try:
-            # Make the request to Supabase
-            with httpx.Client() as client:
-                response = client.get(api_endpoint, headers=headers, params=params)
-                response.raise_for_status()
+            # Connect to the PostgreSQL database
+            conn = psycopg2.connect(db_url)
+            cursor = conn.cursor()
+            
+            # Query the voice table for the storage_url (lowercase table name)
+            query = "SELECT storage_url FROM public.\"Voice\" WHERE x_handle = %s"
+            cursor.execute(query, (x_handle,))
+            
+            # Fetch the result
+            result = cursor.fetchone()
+            
+            # Close the database connection
+            cursor.close()
+            conn.close()
+            
+            if not result:
+                raise ValueError(f"No record found for x_handle: {x_handle}")
                 
-                # Parse the JSON response
-                data = response.json()
+            storage_url = result[0]
+            
+            if not storage_url:
+                raise ValueError(f"Record found for {x_handle}, but storage_url is missing")
+            
+            print(f"Successfully retrieved storage_url for {x_handle}")
+            return storage_url
                 
-                if not data:
-                    raise ValueError(f"No record found for x_handle: {x_handle}")
-                
-                # Extract the storage_url from the first result
-                storage_url = data[0].get("storage_url")
-                
-                if not storage_url:
-                    raise ValueError(f"Record found for {x_handle}, but storage_url is missing")
-                
-                return storage_url
-                
-        except httpx.HTTPError as e:
-            raise Exception(f"Error querying Supabase: {str(e)}")
+        except psycopg2.Error as e:
+            raise Exception(f"Error connecting to PostgreSQL database: {str(e)}")
         except Exception as e:
             raise Exception(f"Error processing request: {str(e)}")
     
+
     async def _arun(self, x_handle: str) -> str:
         """
-        Asynchronously query Supabase to get the storage_url for a given x_handle.
+        Asynchronously query Supabase to get the storage_url for a given x_handle using direct PostgreSQL connection.
         
         Args:
             x_handle: The Twitter handle to look up in the voice table
             
         Returns:
             The storage URL for the given handle
+            
+        Raises:
+            ValueError: If no record is found or if credentials are missing
+            Exception: For other errors such as database connection issues
         """
-        # Get credentials from instance or environment variables in this priority:
-        # 1. Instance variables (if provided during initialization)
-        # 2. Environment variables with standard names
-        # 3. Environment variables with alternative names (for DATABASE_URL)
-        url = self.supabase_url or self._get_env_var("SUPABASE_URL") or self._get_env_var("DATABASE_URL")
-        key = self.supabase_key or self._get_env_var("SUPABASE_KEY") or self._get_env_var("SUPABASE_SERVICE_ROLE_KEY")
-        
-        if not url:
-            raise ValueError("Supabase URL not provided. Set SUPABASE_URL or DATABASE_URL environment variable.")
-        
-        if not key:
-            raise ValueError("Supabase API key not provided. Set SUPABASE_KEY or SUPABASE_SERVICE_ROLE_KEY environment variable.")
-        
-        # Construct the API endpoint for the voice table
-        api_endpoint = f"{url}/rest/v1/voice"
-        
-        # Set up headers for Supabase API
-        headers = {
-            "apikey": key,
-            "Authorization": f"Bearer {key}",
-            "Content-Type": "application/json"
-        }
-        
-        # Query parameters to filter by x_handle
-        params = {
-            "select": "storage_url",
-            "x_handle": f"eq.{x_handle}"
-        }
-        
+        # Get PostgreSQL connection string from environment variables or use default
+        db_url = self._get_env_var("DATABASE_URL")       
+        print(f"Connecting to PostgreSQL database asynchronously with handle: {x_handle}")
+            
         try:
-            # Make the request to Supabase
-            async with httpx.AsyncClient() as client:
-                response = await client.get(api_endpoint, headers=headers, params=params)
-                response.raise_for_status()
+            # Connect to the PostgreSQL database asynchronously
+            conn = await asyncpg.connect(db_url)
+            
+            # Query the voice table for the storage_url (lowercase table name)
+            query = "SELECT storage_url FROM public.\"Voice\" WHERE x_handle = $1"
+            result = await conn.fetchrow(query, x_handle)
+            
+            # Close the database connection
+            await conn.close()
+            
+            if not result:
+                raise ValueError(f"No record found for x_handle: {x_handle}")
                 
-                # Parse the JSON response
-                data = response.json()
+            storage_url = result['storage_url']
+            
+            if not storage_url:
+                raise ValueError(f"Record found for {x_handle}, but storage_url is missing")
+            
+            print(f"Successfully retrieved storage_url for {x_handle} (async)")
+            return storage_url
                 
-                if not data:
-                    raise ValueError(f"No record found for x_handle: {x_handle}")
-                
-                # Extract the storage_url from the first result
-                storage_url = data[0].get("storage_url")
-                
-                if not storage_url:
-                    raise ValueError(f"Record found for {x_handle}, but storage_url is missing")
-                
-                return storage_url
-                
-        except httpx.HTTPError as e:
-            raise Exception(f"Error querying Supabase: {str(e)}")
+        except asyncpg.PostgresError as e:
+            raise Exception(f"Error connecting to PostgreSQL database: {str(e)}")
         except Exception as e:
             raise Exception(f"Error processing request: {str(e)}")

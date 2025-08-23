@@ -1,11 +1,12 @@
 from pydantic import BaseModel
-from typing import Dict, List, Optional, Literal, Any
+from typing import  List, Literal 
 
-from src.rooki_ai.models.voice_profile import GuardrailItem, PillarItem
+from rooki_ai.models.voice_profile import ContentMetrics, GuardrailItem, PillarItem
 
 class VoiceProfileRequest(BaseModel):
     x_handle: str
-    config: Optional[Dict[str, int]] = None
+    pillar: int = 3
+    guardrail: int = 3
 
 
 
@@ -14,7 +15,7 @@ class VoiceProfileResponse(BaseModel):
     tone: Literal['direct', 'helpful', 'witty', 'professional', 'educational']
     pillars: List[PillarItem]
     guardrails: List[GuardrailItem]
-    post_metrics: Dict[str, float]
-    reply_metrics: Dict[str, float]
-    quoted_metrics: Dict[str, float]
-    long_form_text_metrics: Dict[str, float]
+    post_metrics: ContentMetrics
+    reply_metrics: ContentMetrics
+    quoted_metrics: ContentMetrics
+    long_form_text_metrics: ContentMetrics

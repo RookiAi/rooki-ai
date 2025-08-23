@@ -38,7 +38,7 @@ class VoiceProfileCrew():
         # supabase_bucket = _get_env_var('SUPABASE_BUCKET', 'twitter-corpus')
         
         # Tools for corpus_agent
-        supabase_tool = SupabaseUserTweetsStorageUrlTool()  # Will get env vars internally
+        supabase_tool = SupabaseUserTweetsStorageUrlTool() 
         tweet_history_tool = TweetHistoryStorageTool()
         # jsonl_reader_tool = JSONLReaderTool()
         # text_normalize_tool = TextNormalizeTool()
@@ -55,7 +55,7 @@ class VoiceProfileCrew():
         
         return {
             'corpus_agent': [supabase_tool, tweet_history_tool],
-            'metrics_agent': [],
+            'metrics_agent': [supabase_tool, tweet_history_tool],
             'synth_agent': [json_schema_validator_tool]
             # 'corpus_agent': [supabase_tool, jsonl_reader_tool, text_normalize_tool],
             # 'metrics_agent': [style_metrics_tool, influencer_metrics_tool],
@@ -123,6 +123,27 @@ class VoiceProfileCrew():
             
             Then, use the TweetHistoryStorageTool to fetch the tweet history data using that URL:
             tweet_data = TweetHistoryStorageTool(storage_url=storage_url)
+            posts = tweet_data["posts"]
+            replies = tweet_data["replies"]
+            quotes = tweet_data["quotes"]
+            
+            Compute style metrics for the entire corpus. Additionally, compute specific ContentMetrics for each content type:
+            
+            1. Analyze posts to compute post_metrics with:
+            - avg_sentence_len: float - Average sentence length (words per sentence)
+            - imperative_pct: float - Percentage of sentences using imperative voice (0.0 to 1.0) 
+            - emoji_rate: float - Rate of emoji usage per word
+            
+            2. Analyze replies to compute reply_metrics with the same fields.
+            3. Analyze quotes to compute quoted_metrics with the same fields.
+            4. Analyze tweets longer than 280 characters to compute long_form_text_metrics with the same fields.
+            
+            Your response should include both the StyleProfile and the separate ContentMetrics for each content type.
+            Return as a JSON object with the StyleProfile fields plus these additional fields:
+            - post_metrics: ContentMetrics object
+            - reply_metrics: ContentMetrics object
+            - quoted_metrics: ContentMetrics object  
+            - long_form_text_metrics: ContentMetrics object
             """
         )
 
@@ -137,23 +158,39 @@ class VoiceProfileCrew():
             
             First, use the SupabaseUserTweetsStorageUrlTool to fetch the storage URL for this Twitter handle:
             storage_url = SupabaseUserTweetsStorageUrlTool(x_handle="{x_handle}")
-            
+
             Then, use the TweetHistoryStorageTool to fetch the tweet history data using that URL:
             tweet_data = TweetHistoryStorageTool(storage_url=storage_url)
+            
+            Use the style profile and content metrics that were computed in the previous task.
+            The compute_metrics_task result contains a StyleProfile and ContentMetrics for each content type:
+            - post_metrics: ContentMetrics for posts
+            - reply_metrics: ContentMetrics for replies  
+            - quoted_metrics: ContentMetrics for quotes
+            - long_form_text_metrics: ContentMetrics for tweets longer than 280 characters
+            
+            Based on these metrics, create a voice guide suggestion following these steps:
+            1. Review the StyleProfile to understand the user's writing style
+            2. Use the specific ContentMetrics for each content type to inform your recommendations
             
             IMPORTANT: Before finalizing your response, you MUST validate your output using:
             validation_result = JSONSchemaValidatorTool(data=your_voice_guide_suggestion)
             
             If validation_result["valid"] is False, fix the errors and validate again until it passes.
-            You must create exactly {pillar} pillars and {guardrail} guardrails.
+            You must create exactly {pillar} pillars and {guardrail} do guardrails and {guardrail} dont guardrails.
             
             The output must strictly follow the VoiceGuideSuggestion schema with these fields:
             - positioning: string - A positioning statement in the format "For [audience] who need [need], [brand] is the [category] that delivers [benefit]"
             - tone: string - One of: "direct", "helpful", "witty", "professional", or "educational"
             - pillars: list of PillarItem - Each with "pillar" (string) and "weighting" (number)
             - guardrails: list of GuardrailItem - Each with "type" ("do" or "dont") and "guardrail" (string)
-            - metrics: dictionary with post_metrics and reply_metrics
-            """
+            - post_metrics: ContentMetrics - Use the post_metrics from the previous task
+            - reply_metrics: ContentMetrics - Use the reply_metrics from the previous task
+            - quoted_metrics: ContentMetrics - Use the quoted_metrics from the previous task
+            - long_form_text_metrics: ContentMetrics - Use the long_form_text_metrics from the previous task
+            
+            Do not recalculate the metrics - use the pre-computed metrics from the previous task.
+        """
         )
 
     @crew

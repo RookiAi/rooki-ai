@@ -1,12 +1,12 @@
 import os
 import logging
-from typing import Dict, Optional, Any
+from typing import Dict, Optional 
 
 from fastapi import FastAPI, Header, HTTPException, status
 from pydantic import BaseModel
 
-from rooki_ai.main import run
 from rooki_ai.models import VoiceProfileRequest, VoiceProfileResponse
+from rooki_ai.crews.voice_profile import VoiceProfileCrew
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -71,18 +71,82 @@ async def create_voice_profile(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Another compute run is already active for {request.x_handle}"
         )
-    
+
+    pillar = request.config.get("pillar", 3) if request.config else 3
+    guardrail = request.config.get("guardrail", 3) if request.config else 3 
+
     try:
         # Run the crew to generate the voice guide
-        result = run(x_handle=request.x_handle, config=request.config)
+    # Construct inputs for the crew
+        inputs = {
+            'x_handle': request.x_handle,
+            'pillar': pillar,
+            'guardrail': guardrail,
+        }
         
-        if not result:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Failed to generate voice profile"
+        try:
+            result = VoiceProfileCrew().crew().kickoff(inputs=inputs)
+            print(f"Voice guide generated for {request.x_handle}: {result}")
+            if not result:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Failed to generate voice profile"
+                )
+
+            import json
+            if isinstance(result.raw, str):
+                try:
+                    result_dict = json.loads(result.raw)
+                except json.JSONDecodeError:
+                    # If JSON parsing fails, try to extract the JSON part
+                    import re
+                    json_match = re.search(r'({[\s\S]*})', result.raw)
+                    if json_match:
+                        try:
+                            result_dict = json.loads(json_match.group(1))
+                        except:
+                            raise HTTPException(status_code=500, detail="Failed to parse crew output")
+                    else:
+                        raise HTTPException(status_code=500, detail="Failed to parse crew output")
+            else:
+                # If result.raw is already a dict, use it directly
+                result_dict = result.raw
+            
+            # Construct response using the parsed dictionary
+            response = VoiceProfileResponse(
+                positioning=result_dict["positioning"],
+                tone=result_dict["tone"],
+                pillars=result_dict["pillars"],
+                guardrails=result_dict["guardrails"],
+                post_metrics={
+                    **result_dict["post_metrics"],
+                    "avg_sentence_len": result_dict["post_metrics"].get("avg_sentence_len", 15),
+                    "imperative_pct": result_dict["post_metrics"].get("imperative_pct", 20),
+                    "emoji_rate": result_dict["post_metrics"].get("emoji_rate", 0.05)
+                },
+                reply_metrics={
+                    **result_dict["reply_metrics"],
+                    "avg_sentence_len": result_dict["reply_metrics"].get("avg_sentence_len", 10),
+                    "imperative_pct": result_dict["reply_metrics"].get("imperative_pct", 15),
+                    "emoji_rate": result_dict["reply_metrics"].get("emoji_rate", 0.03)
+                },
+                quoted_metrics={
+                    **result_dict["quoted_metrics"],
+                    "avg_sentence_len": result_dict["quoted_metrics"].get("avg_sentence_len", 12),
+                    "imperative_pct": result_dict["quoted_metrics"].get("imperative_pct", 18),
+                    "emoji_rate": result_dict["quoted_metrics"].get("emoji_rate", 0.02)
+                },
+                long_form_text_metrics={
+                    **result_dict["long_form_text_metrics"],
+                    "avg_sentence_len": result_dict["long_form_text_metrics"].get("avg_sentence_len", 20),
+                    "imperative_pct": result_dict["long_form_text_metrics"].get("imperative_pct", 10),
+                    "emoji_rate": result_dict["long_form_text_metrics"].get("emoji_rate", 0.01)
+                }
             )
-        
-        return result
+
+            return response
+        except Exception as e:
+            raise Exception(f"An error occurred while running the crew: {e}")
     
     except Exception as e:
         # Handle various error types

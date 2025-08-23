@@ -6,11 +6,13 @@ authors = [{ name = "Your Name", email = "you@example.com" }]
 requires-python = ">=3.10,<3.14"
 dependencies = [
     "crewai[tools]>=0.165.1,<1.0.0",
-    "fastapi>=0.109.0",
+    "fastapi[standard]>=0.109.0",
     "uvicorn>=0.27.0",
     "pydantic>=2.0.0",
     "httpx>=0.24.0",
-    "emoji>=2.0.0"
+    "emoji>=2.0.0",
+    "psycopg2-binary>=2.9.10",
+    "asyncpg>=0.30.0",
 ]
 
 [project.scripts]

@@ -12,8 +12,9 @@
   - Reads a cached table/file in Supabase (not live Twitter).
   - `metrics(handles:list[str])-> dict[handle, metrics]`; merges with weights supplied by user.
 - **TemplateLibraryTool** _(optional)_
+
   - Provides few-shot prompt snippets for `market_take`, `ship_update`, etc.
-- **JSONSchemaValidatorTool**
+
 - **HandleValidatorTool**
   - `normalize(handle:str) -> str`
   - `resolve_alias(handle:str) -> str|None` (map to stable `user_id` if you maintain a catalog)
