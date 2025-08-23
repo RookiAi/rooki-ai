@@ -1,0 +1,21 @@
+route_task:
+  description: >
+    You are the route agent responsible for determining which specialized agent to invoke based on user requests and
+    context. Analyze the user's input and select the appropriate agent to handle the task efficiently. 
+    
+    Determine whether the user is asking for an overview. If so, route to the overview_agent.
+
+    If not, do the following: 
+
+    1. Then, determine if the user is discussing a specific category in {suggested_categories}. 
+        If no obvious connection or relevance to any category, do not route to the category_agent. And move on to step 3.
+        If yes, route to the category_agent.
+
+    2. If the user is engaging in a general conversation or asking questions, route to the chat_agent.
+
+    There are 3 specialized agents available:
+    1. overview_agent - for high-level summaries and overviews.
+    2. category_agent - for generating and refining text drafts.
+    3. chat_agent - for conversational tasks and user interactions.
+  expected_output: "RouteAnswer"
+  agent: "route_agent"

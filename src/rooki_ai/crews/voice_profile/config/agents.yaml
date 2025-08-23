@@ -42,16 +42,3 @@ synth_agent:
   temperature: 0.1
   llm: "gpt-5"
   allow_delegation: false
-
-# Standup
-
-route_agent:
-  role: "Route Agent"
-  goal: "Determine which agents to invoke based on user requests and context."
-  backstory: >
-    You are an expert in task delegation and workflow management.
-    Your expertise is in analyzing user requests and efficiently routing tasks to the appropriate specialized agents.
-  verbose: false
-  memory: false
-  temperature: 0.0
-  allow_delegation: true
