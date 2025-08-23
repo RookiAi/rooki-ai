@@ -6,7 +6,9 @@ from fastapi import FastAPI, Header, HTTPException, status
 from pydantic import BaseModel
 
 from rooki_ai.crews.voice_profile.voice_profile import VoiceProfileCrew
+from rooki_ai.flows.coach import CoachFlow
 from rooki_ai.models import VoiceProfileRequest, VoiceProfileResponse
+from rooki_ai.models.api import StandupCoachResponse
 from rooki_ai.utils.update_voice_config_in_supabase import (
     update_voice_config_in_supabase,
 )
@@ -28,6 +30,11 @@ voice_guide_jobs = {}
 class VoiceProfileRequest(BaseModel):
     x_handle: str
     config: Optional[Dict[str, int]] = None
+
+
+class StandupCoachRequestBody(BaseModel):
+    user_id: str
+    user_message: str
 
 
 def verify_api_key(
@@ -277,3 +284,60 @@ async def create_voice_profile(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Internal server error: {str(e)}",
             )
+
+
+@app.post("/v1/standup/coach", response_model=StandupCoachResponse)
+async def standup_coach(
+    request: StandupCoachRequestBody,
+    x_api_key: str = Header(..., description="API Key for authentication"),
+):
+    """
+    Process a standup coaching request and return guidance.
+
+    Args:
+        request: Standup coach request with user_id and user_message
+        x_api_key: API key for authentication
+
+    Returns:
+        StandupCoachResponse: The coaching response
+
+    Raises:
+        HTTPException: If there's an error processing the request
+    """
+    # Verify API key
+    verify_api_key(x_api_key)
+
+    try:
+        # Prepare inputs for the CoachFlow
+        inputs = {
+            "user_id": request.user_id,
+            "user_message": request.user_message,
+        }
+
+        logger.info(f"Processing standup coach request for user {request.user_id}")
+
+        # Initialize and run the CoachFlow
+        flow = CoachFlow()
+
+        # Use concurrent.futures to run the flow.kickoff in a separate thread
+        # This avoids the asyncio.run() in a running event loop issue
+        import asyncio
+        import concurrent.futures
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Run the kickoff method in a separate thread to avoid event loop conflicts
+            result = await asyncio.get_event_loop().run_in_executor(
+                executor, lambda: flow.kickoff(inputs)
+            )
+
+        logger.info(
+            f"Successfully processed standup coach request for user {request.user_id}"
+        )
+
+        return result
+    except Exception as e:
+        logger.error(f"Error processing standup coach request: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error processing standup coach request: {str(e)}",
+        )

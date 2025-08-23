@@ -6,6 +6,7 @@ from litellm import completion
 from pydantic import BaseModel, Field
 
 from rooki_ai.crews import RouteCrew
+from rooki_ai.crews.category.category import CategoryDraftCrew
 from rooki_ai.models.api import FocusState, StandupCoachResponse, StatePatch
 from rooki_ai.utils.get_chat_background import get_chat_background
 
@@ -45,7 +46,8 @@ class CoachFlow(Flow[CoachState]):
         print(f"Passing to RouteCrew: {crew_inputs}")
 
         # The route is now directly a string like "overview_agent", "category_agent", or "chat_agent"
-        route = RouteCrew().crew().kickoff(inputs=crew_inputs)
+        # route = RouteCrew().crew().kickoff(inputs=crew_inputs)
+        route = "category_agent"  # Temporary hardcoded route for testing
         print(f"Selected route: {route}")
 
         # Return both the context and the route string
@@ -93,9 +95,12 @@ class CoachFlow(Flow[CoachState]):
 
         # Placeholder for crew execution - to be implemented later
         # Example: CategoryCrew().crew().kickoff(inputs={"user_id": user_id, **context})
+        message = (
+            CategoryDraftCrew().crew().kickoff(inputs={"user_id": user_id, **context})
+        )
 
         return StandupCoachResponse(
-            message="I'll help you work with this category. (Placeholder for category crew execution)",
+            message=str(message),
             actions=[],
             effects=[],
             keyboard=[],

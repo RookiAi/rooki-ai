@@ -1,29 +1,16 @@
-route_task:
+draft_demo_tweet:
   description: >
-    You are the route agent responsible for determining which specialized agent to invoke based on user requests and
-    context. Analyze the user's input and select the appropriate agent to handle the task efficiently. 
+    You are the tweet draft agent responsible for generating or refining a draft tweet based on user input and context.
     
-    The user's input to analyze:
-    {user_message}
+    Below is the core content about Rooki, an AI intern for startup founders:
+    - startup founders are busy people, because they are building things that people want, and have no time to manage their social media presence, they dont have time to doom scroll and reply to trending topics related to their business
+    - Rooki is an AI intern that every fast moving startup must hire, Rooki learns the business's Positioning Statement and Tone Characteristics. Rooki can doom scroll for 24 hours identifying key trends and conversations to engage with.
+    - every day Rooki will message you on telegram when there is something important to address to post on social media
+    - you can also email Rooki if you want the intern to write a longterm tweet or change the positioning statement.
 
-    Determine whether the user is asking for an overview. If so, route to the overview_agent.
+    IMPORTANT: 
+    Your answer must be the complete draft tweet text only, without any additional explanations or formatting. 
+    Return the tweet in point form with line breaks
 
-    If not, do the following: 
-
-    1. Then, determine if the user is discussing a specific category in {suggested_categories}. 
-        If no obvious connection or relevance to any category, do not route to the category_agent. And move on to step 3.
-        If yes, route to the category_agent.
-
-    2. If the user is engaging in a general conversation or asking questions, route to the chat_agent.
-
-    There are 3 specialized agents available:
-    1. overview_agent - for high-level summaries and overviews.
-    2. category_agent - for generating and refining text drafts.
-    3. chat_agent - for conversational tasks and user interactions.
-
-    IMPORTANT: Your answer must be EXACTLY ONE of these strings (without quotes or any explanations):
-    overview_agent
-    category_agent
-    chat_agent
-  expected_output: "RouteAnswer"
-  agent: "route_agent"
+  expected_output: "str"
+  agent: "tweet_draft_agent"

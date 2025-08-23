@@ -36,37 +36,30 @@ class CategoryDraftCrew:
     def _initialize_tools(self):
         """Initialize tools for agents."""
         return {
-            "route_agent": [],
+            "tweet_draft_agent": [],
         }
 
     @agent
-    def route_agent(self) -> Agent:
+    def tweet_draft_agent(self) -> Agent:
         """Route agent."""
-        tools = self._initialize_tools()["route_agent"]
+        tools = self._initialize_tools()["tweet_draft_agent"]
         return Agent(
-            config=self.agents_config["route_agent"], tools=tools, verbose=True
+            config=self.agents_config["tweet_draft_agent"], tools=tools, verbose=True
         )
 
     @task
-    def route_task(self) -> Task:
+    def draft_demo_tweet(self) -> Task:
         """Task for selecting a routing agent"""
         return Task(
-            config=self.tasks_config["route_task"],
+            config=self.tasks_config["draft_demo_tweet"],
             expected_output="RouteAnswer",
             description="""
-            You are routing the user request to the appropriate service based on the user's message and other input parameters.
-
+            You are drafting a tweet to highlight how Rooki can be every startup's social media manager.
             Use the context provided to determine the best course of action.
-            - User Request: {user_message}
-            - User ID: {user_id}
-            - {messages}: for the past 50 messages from the chat with user
-            - {convo_summary}: the current conversation summary
-            - {suggested_categories}: the suggested categories for the user
-            
-            IMPORTANT: Return ONLY ONE of these strings as your final answer (without quotes or any other text):
-            - overview_agent
-            - category_agent
-            - chat_agent
+            - startup founders are busy people, because they are building things that people want, and have no time to manage their social media presence, they dont have time to doom scroll and reply to trending topics related to their business
+            - Rooki is an AI intern that every fast moving startup must hire, Rooki learns the business's Positioning Statement and Tone Characteristics. Rooki can doom scroll for 24 hours identifying key trends and conversations to engage with.
+            - every day Rooki will message you on telegram when there is something important to address to post on social media
+            - you can also email Rooki if you want the intern to write a longterm tweet or change the positioning statement.
             """,
         )
 
@@ -77,8 +70,8 @@ class CategoryDraftCrew:
         max_rpm = int(_get_env_var("CREWAI_MAX_RPM", "30"))
 
         return Crew(
-            agents=[self.route_agent()],
-            tasks=[self.route_task()],
+            agents=[self.tweet_draft_agent()],
+            tasks=[self.draft_demo_tweet()],
             process=Process.sequential,
             memory=memory,
             max_rpm=max_rpm,
