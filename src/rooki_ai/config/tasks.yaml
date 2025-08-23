@@ -1,0 +1,31 @@
+load_corpus_task:
+  description: >
+    Load and normalize the Twitter corpus from the provided Supabase storage URL. Extract cleaned text samples and 
+    provide statistics about the corpus. The corpus should include at least 300 samples, each around 1-2k characters.
+    Remove URLs, normalize whitespace, but preserve emojis and hashtags.
+  expected_output: "CorpusOut"
+  agent: "corpus_agent"
+
+compute_metrics_task:
+  description: >
+    Analyze the provided text samples to compute style metrics. Calculate sentence length, 
+    imperative usage, emoji rate, hashtag rate, link rate, and determine the overall cadence style.
+    If influencer metrics are provided, blend them into the analysis with appropriate weights.
+  expected_output: "StyleProfile"
+  agent: "metrics_agent"
+  context: ["load_corpus_task"]
+
+synthesize_voice_guide_task:
+  description: >
+    Create a voice guide suggestion based on the style profile and influencer data. The guide should include:
+    1. A positioning statement in the format "For builders who need X, Brand is the Y that delivers Z"
+    2. A tone classification (direct, helpful, witty, professional, or educational)
+    3. Content pillars with appropriate weightings (weights should sum to approximately 1)
+    4. Guardrails with "do" and "don't" recommendations
+    5. Template examples for different content types
+    
+    The output must be schema-valid according to the VoiceGuideSuggestion model. Use the metrics 
+    from the style profile to inform your recommendations.
+  expected_output: "VoiceGuideSuggestion"
+  agent: "synth_agent"
+  context: ["compute_metrics_task"]
