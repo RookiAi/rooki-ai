@@ -54,11 +54,20 @@ class CoachFlow(Flow[CoachState]):
 
     @listen(identify_route)
     def reply(self, route_with_context):
-        route = route_with_context["route"]
+        route_obj = route_with_context["route"]
         context = route_with_context["context"]
         user_id = getattr(self.state, "user_id", None)
 
-        print(f"Selected agent: {route}")
+        print(f"Selected agent: {route_obj}")
+
+        # Debug the exact value and type of route_obj
+        print(f"Selected agent: '{route_obj}' (type: {type(route_obj)})")
+
+        # Strip whitespace and normalize to handle potential format issues
+        if hasattr(route_obj, "raw"):
+            route = str(route_obj.raw).strip().lower()
+        else:
+            route = str(route_obj).strip().lower()
 
         if route == "category_agent":
             return self._handle_category_agent(context, user_id)
@@ -99,30 +108,17 @@ class CoachFlow(Flow[CoachState]):
         """
         print(f"Executing chat agent LLM for user {user_id}")
 
-        # Try to get user_message from state first
-        user_message = getattr(self.state, "user_message", None)
-
-        # If not available in state, extract from context
-        if not user_message:
-            user_message = "How can I help you today?"
-            if context and "messages" in context and context["messages"]:
-                user_message = context["messages"][-1].get("content", user_message)
-            if context and "user_message" in context:
-                user_message = context["user_message"]
-
-        recent_message = user_message
-
         # Execute LLM call for chat response
         response = completion(
             model=self.model,
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a helpful assistant responding to a general query.",
+                    "content": "You are an marketing intern talking to your manager about your work.",
                 },
                 {
                     "role": "user",
-                    "content": recent_message,
+                    "content": f"Provide a comprehensive overview based on this context: {context}. Reply in conversational tone (no programming details about context). Keep answer short and precise",
                 },
             ],
         )
@@ -143,22 +139,17 @@ class CoachFlow(Flow[CoachState]):
         """
         print(f"Executing overview agent LLM for user {user_id}")
 
-        # Generate a comprehensive summary based on context
-        summary_context = "your conversation history"
-        if context and "convo_summary" in context:
-            summary_context = context["convo_summary"]
-
         # Execute LLM call for overview response
         response = completion(
             model=self.model,
             messages=[
                 {
                     "role": "system",
-                    "content": "You are an assistant that provides clear summaries and overviews.",
+                    "content": "You are an marketing intern talking to your manager about your work.",
                 },
                 {
                     "role": "user",
-                    "content": f"Provide a comprehensive overview based on this context: {summary_context}",
+                    "content": f"Provide a comprehensive overview based on this context: {context}. Reply in conversational tone (no programming details about context). Keep answer short and precise",
                 },
             ],
         )

@@ -18,7 +18,7 @@ def run():
 
     inputs = {
         "user_id": user_id,
-        "user_message": "What have you done today?",
+        "user_message": "Let's highlight how Rooki can be every startup's social media manager",
     }
 
     flow = CoachFlow()
