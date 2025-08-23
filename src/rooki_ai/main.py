@@ -11,7 +11,7 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 # Replace with inputs you want to test with, it will automatically
 # interpolate any tasks and agents information
 
-def run(x_handle: str = "hinsonsidan", config: dict = None):
+def run(x_handle: str = "jinglescode"):
     """
     Run the voice profile crew.
     
@@ -22,19 +22,12 @@ def run(x_handle: str = "hinsonsidan", config: dict = None):
     Returns:
         VoiceGuideSuggestion object with the generated voice guide
     """
-    if config is None:
-        config = {
-            "pillar": 3,
-            "guardrail": 3,
-        }
         
     # Construct inputs for the crew
     inputs = {
         'x_handle': x_handle,
-        'config': config,
-        'storage_url': f"twitter-corpus/{x_handle}.jsonl",
-        'format': 'jsonl',
-        'schema_version': '1.0'
+        'pillar': 3,
+        'guardrail': 3,
     }
     
     try:

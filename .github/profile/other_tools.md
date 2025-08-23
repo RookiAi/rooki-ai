@@ -1,0 +1,22 @@
+### Tool
+
+- **JSONLReaderTool**
+  - `iter_jsonl(bytes|stream) -> Iterator[dict]`
+  - Enforces per-record size/fields, drops retweets, dedupes by id.
+- **TextNormalizeTool**
+  - `clean(tweet) -> str` (strip URLs, collapse whitespace, keep emoji, keep hashtags).
+- **StyleMetricsTool**
+  - From cleaned samples: sentence tokenization, imperative detection (simple POS heuristic), emoji/hashtag/link rates, cadence class.
+  - `compute(texts:list[str]) -> dict` (implements metrics; pure Python)
+- **InfluencerMetricsTool** _(optional)_
+  - Reads a cached table/file in Supabase (not live Twitter).
+  - `metrics(handles:list[str])-> dict[handle, metrics]`; merges with weights supplied by user.
+- **TemplateLibraryTool** _(optional)_
+  - Provides few-shot prompt snippets for `market_take`, `ship_update`, etc.
+- **JSONSchemaValidatorTool**
+- **HandleValidatorTool**
+  - `normalize(handle:str) -> str`
+  - `resolve_alias(handle:str) -> str|None` (map to stable `user_id` if you maintain a catalog)
+- **SupabaseTableTool**
+  - `get_metrics(handles:list[str]) -> dict[handle, row]`
+  - Row model: `{handle, metrics:jsonb, sample_count:int, cached_at:ts, ttl_valid:bool}`

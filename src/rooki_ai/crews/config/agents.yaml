@@ -22,7 +22,7 @@ metrics_agent:
 
 synth_agent:
   role: "Voice Synthesizer"
-  goal: "Generate the final VoiceGuideSuggestion (positioning, tone, pillars+weights, guardrails, templates) using the StyleProfile and influencers. Must produce schema-valid JSON only."
+  goal: "Generate the final VoiceGuideSuggestion (positioning, tone, pillars+weights, guardrails) using the StyleProfile and influencers. Must produce schema-valid JSON only."
   backstory: >
     You are a voice and tone expert who specializes in creating brand voice guides.
     You analyze writing patterns and metrics to develop clear guidelines that capture a brand's unique voice.

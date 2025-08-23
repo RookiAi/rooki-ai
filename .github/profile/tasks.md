@@ -43,7 +43,6 @@
         tone: Literal['direct','helpful','witty','professional','educational']
         pillars: list[dict]  # { pillar: str, weighting: float } (weights sum≈1)
         guardrails: list[dict]  # { type: 'do'|'dont', guardrail: str }
-        templates: list[dict]  # { template_type: str, template: str }
         metrics: dict          # echo key metrics used
 
     ```

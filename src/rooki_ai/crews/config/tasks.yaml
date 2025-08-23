@@ -20,9 +20,8 @@ synthesize_voice_guide_task:
     Create a voice guide suggestion based on the style profile and influencer data. The guide should include:
     1. A positioning statement in the format "For builders who need X, Brand is the Y that delivers Z"
     2. A tone classification (direct, helpful, witty, professional, or educational)
-    3. Content pillars with appropriate weightings (weights should sum to approximately 1)
-    4. Guardrails with "do" and "don't" recommendations
-    5. Template examples for different content types
+    3. Content pillars with appropriate weightings (weights should sum to approximately 1)  - you MUST create exactly {pillar} pillars (weights should sum to approximately 1)
+    4. Guardrails with "do" and "don't" recommendations - you MUST create exactly {guardrail} guardrails
     
     The output must be schema-valid according to the VoiceGuideSuggestion model. Use the metrics 
     from the style profile to inform your recommendations.
