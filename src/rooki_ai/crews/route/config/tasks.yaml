@@ -17,5 +17,10 @@ route_task:
     1. overview_agent - for high-level summaries and overviews.
     2. category_agent - for generating and refining text drafts.
     3. chat_agent - for conversational tasks and user interactions.
+
+    IMPORTANT: Your answer must be EXACTLY ONE of these strings (without quotes or any explanations):
+    overview_agent
+    category_agent
+    chat_agent
   expected_output: "RouteAnswer"
   agent: "route_agent"

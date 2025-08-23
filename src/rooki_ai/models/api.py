@@ -1,7 +1,14 @@
-from pydantic import BaseModel, Field
-from typing import List, Literal, Dict, Any, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
-from rooki_ai.models.voice_profile import ContentMetrics, GuardrailItem, PillarItem, VoiceTone
+from pydantic import BaseModel, Field
+
+from rooki_ai.models.voice_profile import (
+    ContentMetrics,
+    GuardrailItem,
+    PillarItem,
+    VoiceTone,
+)
+
 
 class VoiceProfileRequest(BaseModel):
     x_handle: str
@@ -72,14 +79,8 @@ class FocusState(BaseModel):
     draft_id: Optional[str] = None
 
 
-class StatePatch(BaseModel):
-    focus: FocusState
-
-
 class StandupCoachResponse(BaseModel):
     message: str
     actions: List[ActionItem]
     effects: List[Union[GeneratedDraftEffect, Dict[str, Any]]]
     keyboard: List[KeyboardButton]
-    state_patch: StatePatch
-

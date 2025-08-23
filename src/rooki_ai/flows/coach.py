@@ -34,9 +34,13 @@ class CoachFlow(Flow[CoachState]):
 
         # Include user_id in the inputs passed to RouteCrew
         crew_inputs = {"user_id": user_id, **chat_background}
-        route = RouteCrew().crew().kickoff(inputs=crew_inputs)
-        route_with_context = {"context": chat_background, "route": route}
 
+        # The route is now directly a string like "overview_agent", "category_agent", or "chat_agent"
+        route = RouteCrew().crew().kickoff(inputs=crew_inputs)
+        print(f"Selected route: {route}")
+
+        # Return both the context and the route string
+        route_with_context = {"context": chat_background, "route": route}
         return route_with_context
 
     # @listen(generate_city)
@@ -61,5 +65,13 @@ class CoachFlow(Flow[CoachState]):
         route = route_with_context["route"]
         context = route_with_context["context"]
 
-        response = StandupCoachResponse(message=route)
+        print(f"Selected agent: {route}")
+
+        # The route is now directly a string like "overview_agent"
+        response = StandupCoachResponse(
+            message=f"Routed to: {route}",
+            actions=[],
+            effects=[],
+            keyboard=[],
+        )
         return response

@@ -49,7 +49,7 @@ class RouteCrew:
 
     @task
     def route_task(self) -> Task:
-        """Task for selecting"""
+        """Task for selecting a routing agent"""
         return Task(
             config=self.tasks_config["route_task"],
             expected_output="RouteAnswer",
@@ -61,6 +61,11 @@ class RouteCrew:
             - {messages}: for the past 50 messages from the chat with user
             - {convo_summary}: the current conversation summary
             - {suggested_categories}: the suggested categories for the user
+            
+            IMPORTANT: Return ONLY ONE of these strings as your final answer (without quotes or any other text):
+            - overview_agent
+            - category_agent
+            - chat_agent
             """,
         )
 
