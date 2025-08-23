@@ -55,7 +55,7 @@ class VoiceProfileCrew():
         
         return {
             'corpus_agent': [supabase_tool, tweet_history_tool],
-            'metrics_agent': [supabase_tool, tweet_history_tool],
+            'metrics_agent': [],
             'synth_agent': [json_schema_validator_tool]
             # 'corpus_agent': [supabase_tool, jsonl_reader_tool, text_normalize_tool],
             # 'metrics_agent': [style_metrics_tool, influencer_metrics_tool],
@@ -93,6 +93,32 @@ class VoiceProfileCrew():
         )
 
     @task
+    def fetch_data_task(self) -> Task:
+        """Task for fetching data from Supabase."""
+        return Task(
+            config=self.tasks_config.get('fetch_data_task', self.tasks_config['load_corpus_task']),
+            expected_output="TweetDataOut",
+            description="""
+            You are retrieving Twitter data for user {x_handle}.
+            
+            Your task is to fetch the tweet data from Supabase:
+            
+            1. Use the SupabaseUserTweetsStorageUrlTool to fetch the storage URL for this Twitter handle:
+               storage_url = SupabaseUserTweetsStorageUrlTool(x_handle="{x_handle}")
+            
+            2. Then, use the TweetHistoryStorageTool to fetch the tweet history data using that URL:
+               tweet_data = TweetHistoryStorageTool(storage_url=storage_url)
+            
+            3. Return the full tweet_data object containing:
+               - posts: Array of tweet objects
+               - replies: Array of reply tweet objects
+               - quotes: Array of quote tweet objects
+               
+            Your response should be the complete tweet_data object, preserving all original data.
+            """
+        )
+
+    @task
     def load_corpus_task(self) -> Task:
         """Task for loading and normalizing the Twitter corpus."""
         return Task(
@@ -106,6 +132,33 @@ class VoiceProfileCrew():
             
             Then, use the TweetHistoryStorageTool to fetch the tweet history data using that URL:
             tweet_data = TweetHistoryStorageTool(storage_url=storage_url)
+
+            posts = tweet_data["posts"]
+            replies = tweet_data["replies"]
+            quotes = tweet_data["quotes"]
+            
+            Compute style metrics for the entire corpus. Additionally, compute specific ContentMetrics for each content type:
+            
+            IMPORTANT: Before finalizing your response, you MUST validate your output using:
+            validation_result = JSONSchemaValidatorTool(data=your_voice_guide_suggestion)
+
+            1. Analyze posts to compute post_metrics with:
+            - avg_sentence_len: float - Average sentence length (words per sentence)
+            - imperative_pct: float - Percentage of sentences using imperative voice (0.0 to 1.0) 
+            - emoji_rate: float - Rate of emoji usage per word
+            
+            2. Analyze replies to compute reply_metrics with the same fields.
+            3. Analyze quotes to compute quoted_metrics with the same fields.
+            4. Analyze tweets longer than 280 characters to compute long_form_text_metrics with the same fields.
+
+            If any of these content types have no data, set their metrics to 0.
+
+            Your response should include both the StyleProfile and the separate ContentMetrics for each content type.
+            Return as a JSON object with the StyleProfile fields plus these additional fields:
+            - post_metrics: ContentMetrics object
+            - reply_metrics: ContentMetrics object
+            - quoted_metrics: ContentMetrics object  
+            - long_form_text_metrics: ContentMetrics object
             """
         )
 
@@ -118,32 +171,7 @@ class VoiceProfileCrew():
             description="""
             You are analyzing the Twitter profile for user {x_handle}.
             
-            First, use the SupabaseUserTweetsStorageUrlTool to fetch the storage URL for this Twitter handle:
-            storage_url = SupabaseUserTweetsStorageUrlTool(x_handle="{x_handle}")
-            
-            Then, use the TweetHistoryStorageTool to fetch the tweet history data using that URL:
-            tweet_data = TweetHistoryStorageTool(storage_url=storage_url)
-            posts = tweet_data["posts"]
-            replies = tweet_data["replies"]
-            quotes = tweet_data["quotes"]
-            
-            Compute style metrics for the entire corpus. Additionally, compute specific ContentMetrics for each content type:
-            
-            1. Analyze posts to compute post_metrics with:
-            - avg_sentence_len: float - Average sentence length (words per sentence)
-            - imperative_pct: float - Percentage of sentences using imperative voice (0.0 to 1.0) 
-            - emoji_rate: float - Rate of emoji usage per word
-            
-            2. Analyze replies to compute reply_metrics with the same fields.
-            3. Analyze quotes to compute quoted_metrics with the same fields.
-            4. Analyze tweets longer than 280 characters to compute long_form_text_metrics with the same fields.
-            
-            Your response should include both the StyleProfile and the separate ContentMetrics for each content type.
-            Return as a JSON object with the StyleProfile fields plus these additional fields:
-            - post_metrics: ContentMetrics object
-            - reply_metrics: ContentMetrics object
-            - quoted_metrics: ContentMetrics object  
-            - long_form_text_metrics: ContentMetrics object
+            Use the tweet_data that were computed in the previous task.
             """
         )
 
@@ -156,12 +184,7 @@ class VoiceProfileCrew():
             description="""
             You are analyzing the Twitter profile for user {x_handle}.
             
-            First, use the SupabaseUserTweetsStorageUrlTool to fetch the storage URL for this Twitter handle:
-            storage_url = SupabaseUserTweetsStorageUrlTool(x_handle="{x_handle}")
-
-            Then, use the TweetHistoryStorageTool to fetch the tweet history data using that URL:
-            tweet_data = TweetHistoryStorageTool(storage_url=storage_url)
-            
+            Use the tweet_data that were computed in the previous task.
             Use the style profile and content metrics that were computed in the previous task.
             The compute_metrics_task result contains a StyleProfile and ContentMetrics for each content type:
             - post_metrics: ContentMetrics for posts
@@ -173,12 +196,18 @@ class VoiceProfileCrew():
             1. Review the StyleProfile to understand the user's writing style
             2. Use the specific ContentMetrics for each content type to inform your recommendations
             
-            IMPORTANT: Before finalizing your response, you MUST validate your output using:
-            validation_result = JSONSchemaValidatorTool(data=your_voice_guide_suggestion)
+            Your output MUST strictly follow these requirements:
+            - Create EXACTLY {guardrail} "do" type guardrails (not more, not less)
+            - Create EXACTLY {guardrail} "dont" type guardrails (not more, not less)
+            - Create EXACTLY {pillar} content pillars
             
+            IMPORTANT: Before finalizing your response, you MUST validate your output:
+            1. Count the guardrails: there MUST be exactly {guardrail} 'do' and {guardrail} 'dont' guardrails
+            2. Count the pillars: there MUST be exactly {pillar} pillars
+            3. Then validate using: validation_result = JSONSchemaValidatorTool(data=your_voice_guide_suggestion)
+        
             If validation_result["valid"] is False, fix the errors and validate again until it passes.
-            You must create exactly {pillar} pillars and {guardrail} do guardrails and {guardrail} dont guardrails.
-            
+
             The output must strictly follow the VoiceGuideSuggestion schema with these fields:
             - positioning: string - A positioning statement in the format "For [audience] who need [need], [brand] is the [category] that delivers [benefit]"
             - tone: string - One of: "direct", "helpful", "witty", "professional", or "educational"
@@ -201,7 +230,7 @@ class VoiceProfileCrew():
         
         return Crew(
             agents=[self.corpus_agent(), self.metrics_agent(), self.synth_agent()],
-            tasks=[self.load_corpus_task(), self.compute_metrics_task(), self.synthesize_voice_guide_task()],
+            tasks=[self.fetch_data_task(), self.load_corpus_task(), self.compute_metrics_task(), self.synthesize_voice_guide_task()],
             process=Process.sequential,
             memory=memory,
             max_rpm=max_rpm,

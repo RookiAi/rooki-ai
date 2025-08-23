@@ -1,6 +1,12 @@
 from typing import Any, Dict, List, Literal
 from pydantic import BaseModel
 
+class TweetDataOut(BaseModel):
+    replies: List[Dict[str, Any]]
+    posts: List[Dict[str, Any]]
+    quotes: List[Dict[str, Any]]
+    long_form_texts: List[Dict[str, Any]]
+
 class PillarItem(BaseModel):
     pillar: str
     weighting: float
@@ -8,17 +14,6 @@ class PillarItem(BaseModel):
 class GuardrailItem(BaseModel):
     type: Literal['do', 'dont']
     guardrail: str
-
-class CorpusOut(BaseModel):
-    text: str
-    metadata: Dict[str, Any]
-    type: Literal['post', 'reply', 'quote', 'long_form']
-
-class StyleProfile(BaseModel):
-    tone_distribution: Dict[str, float]
-    topic_distribution: Dict[str, float]
-    engagement_metrics: Dict[str, float]
-    content_patterns: Dict[str, List[str]]
 
 class ContentMetrics(BaseModel):
     """
@@ -43,6 +38,19 @@ class ContentMetrics(BaseModel):
     imperative_pct: float
     emoji_rate: float
 
+class CorpusOut(BaseModel):
+    text: str
+    metadata: Dict[str, Any]
+    type: Literal['post', 'reply', 'quote', 'long_form']
+
+
+class StyleProfile(BaseModel):
+    tone_distribution: Dict[str, float]
+    topic_distribution: Dict[str, float]
+    engagement_metrics: Dict[str, float]
+    content_patterns: Dict[str, List[str]]
+
+    
 class VoiceGuideSuggestion(BaseModel):
     positioning: str
     tone: str

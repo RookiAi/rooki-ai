@@ -1,3 +1,25 @@
+fetch_data_task:
+  description: >
+    You are retrieving Twitter data for user {x_handle}.
+    
+    Your task is to fetch the tweet data from Supabase:
+    
+    1. Use the SupabaseUserTweetsStorageUrlTool to fetch the storage URL for this Twitter handle:
+       storage_url = SupabaseUserTweetsStorageUrlTool(x_handle="{x_handle}")
+    
+    2. Then, use the TweetHistoryStorageTool to fetch the tweet history data using that URL:
+       tweet_data = TweetHistoryStorageTool(storage_url=storage_url)
+      
+    3. Return the full tweet_data object containing:
+       - posts: Array of tweet objects
+       - replies: Array of reply tweet objects
+       - quotes: Array of quote tweet objects
+       - long_form_texts: Array of tweets from posts, replies and quotes which are longer than 280 characters
+
+    Your response should be the complete tweet_data object, preserving all original data.
+  expected_output: "TweetDataOut"
+  agent: "corpus_agent"
+
 load_corpus_task:
   description: >
     Load and normalize the Twitter corpus from the provided Supabase storage URL. Extract cleaned text samples and 
@@ -20,18 +42,15 @@ synthesize_voice_guide_task:
     Create a voice guide suggestion based on the style profile and influencer data. The guide should include:
     1. A positioning statement in the format "For builders who need X, Brand is the Y that delivers Z"
     2. A tone classification (direct, helpful, witty, professional, or educational)
-    3. Content pillars with appropriate weightings (weights should sum to approximately 1)  - you MUST create exactly {pillar} pillars (weights should sum to approximately 1)
-    4. Guardrails with "do" and "don't" recommendations - you MUST create exactly {guardrail} guardrails
-    
-    IMPORTANT FOR METRICS: You MUST follow this specific format for ALL metrics objects:
-    - post_metrics: Analyze with only tweets in posts. ContentMetrics with these EXACT fields:
-      - avg_sentence_len: float - Average sentence length (words per sentence)
-      - imperative_pct: float - Percentage of sentences that use imperative voice (0.0 to 1.0)
-      - emoji_rate: float - Average number of emojis per word
-      
-    - reply_metrics: Analyze with only tweets in replies. ContentMetrics with the SAME EXACT fields
-    - quoted_metrics: Analyze with only tweets in quotes. ContentMetrics with the SAME EXACT fields
-    - long_form_text_metrics: Analyze with only tweets which are longer than 280 characters. ContentMetrics with the SAME EXACT fields
+    3. Content pillars with appropriate weightings in float - you MUST create exactly {pillar} pillars (weights should sum to approximately 1)
+    4. Guardrails with "do" and "don't" recommendations:
+    - You MUST create EXACTLY {guardrail} guardrails of type "do" (not {guardrail} total, but {guardrail} "do" type)
+    - You MUST create EXACTLY {guardrail} guardrails of type "dont" (not {guardrail} total, but {guardrail} "dont" type)
+    - Total guardrails should be {guardrail} "do" + {guardrail} "dont" = {guardrail}*2 total guardrails
+
+    IMPORTANT: Before submitting your final answer, count the guardrails to ensure:
+    - EXACTLY {guardrail} have type="do"
+    - EXACTLY {guardrail} have type="dont"
 
     The output must be schema-valid according to the VoiceGuideSuggestion model. Use the metrics 
     from the style profile to inform your recommendations.
