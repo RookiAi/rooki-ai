@@ -11,7 +11,7 @@ corpus_agent:
 
 metrics_agent:
   role: "Metrics Analyzer"
-  goal: "Compute style metrics from samples; optionally enrich with influencer metrics; output a StyleProfile vector."
+  goal: "Compute style metrics from samples; optionally enrich with influencer metrics; output a StyleProfile or VoiceTone vector."
   backstory: >
     You are a data scientist specializing in linguistic and stylometric analysis.
     Your expertise is in quantifying writing patterns, tones, and stylistic elements from text samples.

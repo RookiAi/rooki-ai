@@ -63,7 +63,6 @@ synthesize_voice_guide_task:
     from the style profile to inform your recommendations.
   expected_output: "VoiceProfileResponse"
   agent: "synth_agent"
-  context: ["compute_metrics_task"]
 
 route_task:
   description: >
@@ -74,14 +73,15 @@ route_task:
 
     If not, do the following: 
 
-    1. Use the SupabaseDraftsTool to fetch the storage URL for this Twitter handle:
-       drafts = SupabaseDraftsTool(x_handle="{x_handle}")
+    1. Then, determine if the user is discussing a specific category in {suggested_categories}. 
+        If no obvious connection or relevance to any category, do not route to the category_agent. And move on to step 3.
+        If yes, route to the category_agent.
 
-    2. Then, determine if the user is discussing a specific draft. If so, route to the draft_agent.
-
-    3. If the user is engaging in a general conversation or asking questions, route to the chat_agent.
+    2. If the user is engaging in a general conversation or asking questions, route to the chat_agent.
 
     There are 3 specialized agents available:
     1. overview_agent - for high-level summaries and overviews.
-    2. draft_agent - for generating and refining text drafts.
+    2. category_agent - for generating and refining text drafts.
     3. chat_agent - for conversational tasks and user interactions.
+  expected_output: "RouteAnswer"
+  agent: "route_agent"

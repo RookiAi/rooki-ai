@@ -11,6 +11,8 @@ from .voice_profile import (
     VoiceTone
 )
 
+from .coach import RouteAnswer
+
 __all__ = [
     'VoiceProfileRequest',
     'VoiceProfileResponse',
@@ -18,5 +20,6 @@ __all__ = [
     'GuardrailItem',
     'CorpusOut',
     'StyleProfile',
-    'VoiceTone'
+    'VoiceTone',
+    'RouteAnswer'
 ]

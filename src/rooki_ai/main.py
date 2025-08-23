@@ -3,6 +3,7 @@ import sys
 import warnings
 
 from rooki_ai.crews import VoiceProfileCrew
+from rooki_ai.flows.coach import CoachFlow
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
@@ -11,31 +12,32 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 # Replace with inputs you want to test with, it will automatically
 # interpolate any tasks and agents information
 
-def run(x_handle: str = "jinglescode"):
-    """
-    Run the voice profile crew.
-    
-    Args:
-        x_handle: Twitter handle to analyze
-        config: Optional configuration dict with pillar and guardrail settings
-    
-    Returns:
-        VoiceProfileResponse object with the generated voice guide
-    """
+def run():
+    user_id = "cmeojlmrc0000y5hgvlfeich6"
 
-    # Construct inputs for the crew
     inputs = {
-        'x_handle': x_handle,
-        'pillar': 3,
-        'guardrail': 3,
+        "user_id": user_id,
     }
+
+    flow = CoachFlow()
+    flow.plot()
+    result = flow.kickoff(inputs=inputs)
+
+    print(f"Generated fun fact: {result}")
+
+    # # Construct inputs for the crew
+    # inputs = {
+    #     'x_handle': x_handle,
+    #     'pillar': 3,
+    #     'guardrail': 3,
+    # }
     
-    try:
-        result = VoiceProfileCrew().crew().kickoff(inputs=inputs)
-        print(f"Voice guide generated for {x_handle}: {result}")
-        return result
-    except Exception as e:
-        raise Exception(f"An error occurred while running the crew: {e}")
+    # try:
+    #     result = VoiceProfileCrew().crew().kickoff(inputs=inputs)
+    #     print(f"Voice guide generated for {x_handle}: {result}")
+    #     return result
+    # except Exception as e:
+    #     raise Exception(f"An error occurred while running the crew: {e}")
 
 
 def train():

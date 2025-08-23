@@ -186,7 +186,8 @@ class VoiceProfileCrew():
             
             Use the tweet_data that were computed in the previous task.
             
-            Then validate using: validation_result = JSONSchemaValidatorTool(data=your_voice_tone_suggestion)
+            Then validate using:
+            validation_result = JSONSchemaValidatorTool(data=your_voice_tone_suggestion)
         
             If validation_result["valid"] is False, fix the errors and validate again until it passes.
             """
@@ -243,7 +244,7 @@ class VoiceProfileCrew():
     def crew(self) -> Crew:
         """Create the Voice Guide generator crew."""
         memory = _get_env_var('CREWAI_MEMORY', 'false').lower() == 'true'
-        max_rpm = int(_get_env_var('CREWAI_MAX_RPM', '30'))
+        max_rpm = int(_get_env_var('CREWAI_MAX_RPM', '50'))
         
         return Crew(
             agents=[self.corpus_agent(), self.metrics_agent(), self.synth_agent()],

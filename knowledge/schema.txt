@@ -1,0 +1,185 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
+}
+
+// Necessary for Next auth
+model Account {
+    id                       String  @id @default(cuid())
+    userId                   String
+    type                     String
+    provider                 String
+    providerAccountId        String
+    refresh_token            String? // @db.Text
+    access_token             String? // @db.Text
+    expires_at               Int?
+    token_type               String?
+    scope                    String?
+    id_token                 String? // @db.Text
+    session_state            String?
+    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    refresh_token_expires_in Int?
+
+    @@unique([provider, providerAccountId])
+}
+
+model Session {
+    id           String   @id @default(cuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+    id            String    @id @default(cuid())
+    name          String?
+    email         String?   @unique
+    emailVerified DateTime?
+    image         String?
+    accounts      Account[]
+    sessions      Session[]
+    convo        ConvoSummary?
+}
+
+model VerificationToken {
+    identifier String
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
+}
+
+// model Voice {
+//     id            String    @id @default(cuid())
+//     userId       String
+//     xHandle      String
+//     voiceConfig  String
+//     user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+// }
+
+model Voice {
+  id           String   @id @default(uuid())
+  userId       String
+  x_handle     String?
+  storage_url  String?  // manifest/corpus URL (Supabase)
+  positioning  String?  @db.Text
+
+  // JSON fields
+  tone         Json?    // structured JSON (e.g., {style:"direct", knobs:{...}})
+  voice_config Json?   // stores pillars, guardrails, influencers, context as per your spec
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  SuggestedCategory SuggestedCategory[]
+}
+
+model Message {
+  id           String   @id @default(uuid())
+  userId             String
+  role                String
+  channel             String
+  external_chat_id    String?
+  external_message_id String?
+  external_event_id   String?
+  reply_to_message_id String?
+  text                String
+  created_at          DateTime @default(now())
+  edited_at           DateTime?
+  
+}
+
+model ConvoSummary {
+    id           String   @id @default(uuid())
+  userId             String @unique
+  summary     String
+  token_count Int
+  updated_at  DateTime @default(now())
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserTrendingSnapshot {
+  id          String   @id @default(uuid())
+  voiceId     String  
+  storage_url  String
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+////////////////// standup
+
+model DailyTarget {
+  id                    String   @id @default(uuid())
+  voiceId     String   @unique
+  original_update_count Int      @default(0)
+  reply_count           Int      @default(0)
+  niche_reply_count     Int      @default(0)
+  date                  DateTime @db.Date // ISO date-only
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([voiceId, date]) // one row per voice per day
+  @@index([voiceId, date])
+}
+
+/// ---------- Categories, Drafts, Tweets ----------
+model SuggestedCategory {
+  id                    String @id @default(uuid())
+  voiceId String
+
+  voice                 Voice @relation(fields: [voiceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([voiceId])
+}
+
+model DraftFromCategory {
+  id          String @id @default(uuid())
+  category_id String @unique
+  draft       String @db.Text           // generated content
+  intern_comment String? @db.Text       // pillar fit / policy safe notes
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model CategoryTweet {
+  id          String @id @default(uuid())
+  category_id String
+  tweet_url   String
+
+  drafts      DraftFromTweet[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([category_id, tweet_url]) // avoid duplicates within a category
+  @@index([category_id])
+}
+
+model DraftFromTweet {
+  id         String @id @default(uuid())
+  CategoryTweetId   String 
+  type       String
+  draft      String @db.Text
+  intern_comment String? @db.Text
+
+  tweet      CategoryTweet @relation(fields: [CategoryTweetId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+}

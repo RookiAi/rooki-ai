@@ -2,55 +2,56 @@ from crewai.flow.flow import Flow, listen, start
 from dotenv import load_dotenv
 from litellm import completion
 
+from rooki_ai.crews import RouteCrew
+from rooki_ai.models.api import StandupCoachResponse
+from rooki_ai.utils.get_chat_background import get_chat_background
+
 load_dotenv()
+
 
 class CoachFlow(Flow):
     model = "gpt-4o-mini"
 
     @start()
-    def identify_route(self):
+    def identify_route(self, inputs=None):
         print("Starting flow")
         # Each flow state automatically gets a unique ID
         print(f"Flow State ID: {self.state['id']}")
+        print(f"Inputs: {inputs}")
 
-        response = completion(
-            model=self.model,
-            messages=[
-                {
-                    "role": "user",
-                    "content": "Return the name of a random city in the world.",
-                },
-            ],
-        )
+        # Extract user_id from inputs dictionary
+        user_id = inputs.get("user_id") if inputs and isinstance(inputs, dict) else None
+        print(f"Using user_id: {user_id}")
 
-        random_city = response["choices"][0]["message"]["content"]
-        # Store the city in our state
-        self.state["city"] = random_city
-        print(f"Random City: {random_city}")
+        chat_background = get_chat_background(user_id)
+        print(f"Chat background: {chat_background}")
 
-        return random_city
+        route = RouteCrew().crew().kickoff(inputs=chat_background)
+        route_with_context = {"context": chat_background, "route": route}
 
-    @listen(generate_city)
-    def generate_fun_fact(self, random_city):
-        response = completion(
-            model=self.model,
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"Tell me a fun fact about {random_city}",
-                },
-            ],
-        )
+        return route_with_context
 
-        fun_fact = response["choices"][0]["message"]["content"]
-        # Store the fun fact in our state
-        self.state["fun_fact"] = fun_fact
-        return fun_fact
+    # @listen(generate_city)
+    # def generate_fun_fact(self, random_city):
+    #     response = completion(
+    #         model=self.model,
+    #         messages=[
+    #             {
+    #                 "role": "user",
+    #                 "content": f"Tell me a fun fact about {random_city}",
+    #             },
+    #         ],
+    #     )
 
+    #     fun_fact = response["choices"][0]["message"]["content"]
+    #     # Store the fun fact in our state
+    #     self.state["fun_fact"] = fun_fact
+    #     return fun_fact
 
+    @listen(identify_route)
+    def reply(self, route_with_context):
+        route = route_with_context["route"]
+        context = route_with_context["context"]
 
-flow = ExampleFlow()
-flow.plot()
-result = flow.kickoff()
-
-print(f"Generated fun fact: {result}")
+        response = StandupCoachResponse(message=route)
+        return response
