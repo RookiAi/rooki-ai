@@ -1,23 +1,22 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
-from typing import List, Dict, Any, Optional
+from typing import List
 import os
-from functools import wraps
 
 from rooki_ai.models import CorpusOut, StyleProfile, VoiceGuideSuggestion
-from rooki_ai.tools import (
-    SupabaseStorageTool, JSONLReaderTool, TextNormalizeTool,
-    StyleMetricsTool, InfluencerMetricsTool,
-    JSONSchemaValidatorTool, TemplateLibraryTool
-)
+# from rooki_ai.tools import (
+#     SupabaseStorageTool, JSONLReaderTool, TextNormalizeTool,
+#     StyleMetricsTool, InfluencerMetricsTool,
+#     JSONSchemaValidatorTool, TemplateLibraryTool
+# )
 
 def _get_env_var(var_name, default=None):
     """Get environment variable or return default."""
     return os.environ.get(var_name, default)
 
 @CrewBase
-class CrewaiTest():
+class VoiceProfileCrew():
     """Voice Guide Generator Crew
     
     This crew analyzes Twitter data to generate a voice guide suggestion.
@@ -32,33 +31,37 @@ class CrewaiTest():
     
     def _initialize_tools(self):
         """Initialize tools for agents."""
-        supabase_url = _get_env_var('SUPABASE_URL')
+        supabase_url = "https://sextklfkiyceqnptxejr.supabase.co/storage/v1/object/public/tweets/1497769093964783617/tweets_1497769093964783617_2025-08-22T17-53-32-251Z.json"
+        # supabase_url = _get_env_var('SUPABASE_URL')
         supabase_key = _get_env_var('SUPABASE_KEY')
         supabase_bucket = _get_env_var('SUPABASE_BUCKET', 'twitter-corpus')
         
         # Tools for corpus_agent
-        supabase_tool = SupabaseStorageTool(
-            supabase_url=supabase_url,
-            supabase_key=supabase_key,
-            bucket_name=supabase_bucket
-        )
-        jsonl_reader_tool = JSONLReaderTool()
-        text_normalize_tool = TextNormalizeTool()
+        # supabase_tool = SupabaseStorageTool(
+        #     supabase_url=supabase_url,
+        #     supabase_key=supabase_key,
+        #     bucket_name=supabase_bucket
+        # )
+        # jsonl_reader_tool = JSONLReaderTool()
+        # text_normalize_tool = TextNormalizeTool()
         
-        # Tools for metrics_agent
-        style_metrics_tool = StyleMetricsTool()
-        influencer_metrics_tool = InfluencerMetricsTool()
+        # # Tools for metrics_agent
+        # style_metrics_tool = StyleMetricsTool()
+        # influencer_metrics_tool = InfluencerMetricsTool()
         
-        # Tools for synth_agent
-        template_library_tool = TemplateLibraryTool()
-        json_schema_validator_tool = JSONSchemaValidatorTool(
-            schema=VoiceGuideSuggestion.model_json_schema()
-        )
+        # # Tools for synth_agent
+        # template_library_tool = TemplateLibraryTool()
+        # json_schema_validator_tool = JSONSchemaValidatorTool(
+        #     schema=VoiceGuideSuggestion.model_json_schema()
+        # )
         
         return {
-            'corpus_agent': [supabase_tool, jsonl_reader_tool, text_normalize_tool],
-            'metrics_agent': [style_metrics_tool, influencer_metrics_tool],
-            'synth_agent': [template_library_tool, json_schema_validator_tool]
+            'corpus_agent': [],
+            'metrics_agent': [],
+            'synth_agent': []
+            # 'corpus_agent': [supabase_tool, jsonl_reader_tool, text_normalize_tool],
+            # 'metrics_agent': [style_metrics_tool, influencer_metrics_tool],
+            # 'synth_agent': [template_library_tool, json_schema_validator_tool]
         }
 
     @agent
@@ -96,7 +99,7 @@ class CrewaiTest():
         """Task for loading and normalizing the Twitter corpus."""
         return Task(
             config=self.tasks_config['load_corpus_task'],
-            expected_output=CorpusOut
+            expected_output="CorpusOut"
         )
 
     @task
@@ -104,7 +107,7 @@ class CrewaiTest():
         """Task for computing style metrics from the corpus."""
         return Task(
             config=self.tasks_config['compute_metrics_task'],
-            expected_output=StyleProfile
+            expected_output="StyleProfile"
         )
 
     @task
@@ -112,7 +115,7 @@ class CrewaiTest():
         """Task for synthesizing the voice guide from style metrics."""
         return Task(
             config=self.tasks_config['synthesize_voice_guide_task'],
-            expected_output=VoiceGuideSuggestion
+            expected_output="VoiceGuideSuggestion"  # Changed from class to string
         )
 
     @crew

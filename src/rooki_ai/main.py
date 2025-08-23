@@ -2,9 +2,7 @@
 import sys
 import warnings
 
-from datetime import datetime
-
-from rooki_ai.crew import CrewaiTest
+from rooki_ai.crews import VoiceProfileCrew
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
@@ -13,7 +11,7 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 # Replace with inputs you want to test with, it will automatically
 # interpolate any tasks and agents information
 
-def run(x_handle: str = "hinson", config: dict = None):
+def run(x_handle: str = "hinsonsidan", config: dict = None):
     """
     Run the voice profile crew.
     
@@ -40,7 +38,8 @@ def run(x_handle: str = "hinson", config: dict = None):
     }
     
     try:
-        result = CrewaiTest().crew().kickoff(inputs=inputs)
+        result = VoiceProfileCrew().crew().kickoff(inputs=inputs)
+        print(f"Voice guide generated for {x_handle}: {result}")
         return result
     except Exception as e:
         raise Exception(f"An error occurred while running the crew: {e}")
@@ -61,7 +60,7 @@ def train():
         'schema_version': '1.0'
     }
     try:
-        CrewaiTest().crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)
+        VoiceProfileCrew().crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)
 
     except Exception as e:
         raise Exception(f"An error occurred while training the crew: {e}")
@@ -71,7 +70,7 @@ def replay():
     Replay the crew execution from a specific task.
     """
     try:
-        CrewaiTest().crew().replay(task_id=sys.argv[1])
+        VoiceProfileCrew().crew().replay(task_id=sys.argv[1])
 
     except Exception as e:
         raise Exception(f"An error occurred while replaying the crew: {e}")
@@ -92,7 +91,7 @@ def test():
     }
     
     try:
-        CrewaiTest().crew().test(n_iterations=int(sys.argv[1]), eval_llm=sys.argv[2], inputs=inputs)
+        VoiceProfileCrew().crew().test(n_iterations=int(sys.argv[1]), eval_llm=sys.argv[2], inputs=inputs)
 
     except Exception as e:
         raise Exception(f"An error occurred while testing the crew: {e}")
