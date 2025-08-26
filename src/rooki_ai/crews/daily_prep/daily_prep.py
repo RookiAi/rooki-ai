@@ -5,13 +5,7 @@ from crewai import Agent, Crew, Process, Task
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from crewai.project import CrewBase, agent, crew, task
 
-from rooki_ai.models import VoiceProfileResponse
-from rooki_ai.tools import (
-    GetTrendingTweetsTool,
-    JSONSchemaValidatorTool,
-    SupabaseUserTweetsStorageUrlTool,
-    TweetHistoryStorageTool,
-)
+from rooki_ai.tools import GetTrendingTweetsTool
 
 
 def _get_env_var(var_name, default=None):

@@ -1,82 +1,35 @@
+get_tweet_context:
+  description: >
+    Build a TweetContext@v1 from provided context data.
+    - COPY: user_id, user_message, voice_profile, trending_topics, mcp_examples, brand_constraints.
+    - GENERATE: insights_summary (2–4 sentences summarizing patterns relevant to user_message).
+    Return ONLY valid TweetContext@v1 JSON.
+  temperature: 0.3
+  top_p: 0.9
+  expected_output: "TweetContext@v1"
+  agent: "tweet_context_agent"
+
 draft_demo_tweet:
   description: >
-    PERSONALIZATION EXPERT TASK: Create a tweet that sounds EXACTLY like it was written by the user themselves.
-
-    STEP 1 - GET VOICE PROFILE:
-    voice_profile = SuperbaseGetVoiceTool(user_id="{user_id}")
-    
-    STEP 2 - QUICK ANALYSIS:
-    Extract exactly 3 DISTINCTIVE features from the profile:
-    - What makes this person's writing unique? (Short phrases, technical terms, specific structures)
-    - What tone do they use? (Aggressive, thoughtful, humorous, professional)
-    - How do they use punctuation and emoji? (Frequency, patterns, preferences)
-    
-    STEP 3 - CRAFT RESPONSE TO USER:
-    The user's message is: "{user_message}"
-    
-    Start your response with a SHORT, DIRECT reply to this message that EXACTLY matches their voice profile.
-    
-    STEP 4 - DRAFT PERSONALIZED TWEET:
-    Create a tweet about Rooki AI that includes these core points:
-    - Startup founders are too busy building products to manage social media
-    - Rooki is an AI intern that monitors trends 24/7
-    - Rooki sends important alerts via Telegram and handles email requests
-    
-    THE TWEET MUST:
-    1. Use vocabulary, syntax and punctuation that PERFECTLY matches their voice profile
-    2. Incorporate their typical sentence length and structure
-    3. Match their emoji usage pattern (frequency and types)
-    4. Address the specific content in "{user_message}"
-    
-    AVOID ALL GENERIC LANGUAGE. Each tweet should be radically different based on the voice profile.
-    If you cannot access the voice profile, respond: "ERROR: Voice profile access failed."
-
-  temperature: 1.0
-  top_p: 0.98
-  top_k: 40
-  presence_penalty: 0.5
-  frequency_penalty: 0.5
-  expected_output: "str"
+    Using a TweetContext@v1 from context, produce a TweetDraft@v1 with:
+    - prelude: one conversational sentence directly responding to user_message.
+    - tweet: a personalized tweet. Use voice_profile if present; otherwise infer from insights_summary.
+    Respect brand_constraints (hashtags/mentions/alerts). Use trending_topics only for relevance.
+    Return ONLY valid TweetDraft@v1 JSON.
+  temperature: 0.8
+  top_p: 0.95
+  expected_output: "TweetDraft@v1"
   agent: "tweet_draft_agent"
+  requires: ["get_tweet_context"]
 
 refine_demo_tweet:
   description: >
-    You are the tweet refine agent responsible for refining and improving an existing tweet draft based on user
-    feedback and context.
-    CRITICAL INSTRUCTION - VOICE PROFILE USAGE:
-    1. First, retrieve and print the user's voice profile:
-        voice_profile = SuperbaseGetVoiceTool(user_id="{user_id}")
-        print("DEBUG - Voice Profile Retrieved: " + str(voice_profile))
-
-    2. Analyze this voice profile in detail. Extract specific elements:
-        - Tone characteristics (formal/casual, enthusiastic/reserved)
-        - Writing style (direct/indirect, technical/simple)
-        - Emoji usage patterns
-        - Sentence structure preferences
-        - Any unique quirks or patterns
-
-    3. Before refining, write a brief analysis of how you'll incorporate these elements.
-    4. Refine the following tweet draft to better align with the user's voice profile:
-       "{tweet_draft}"
-    5. Ensure the refined tweet still conveys:
-        - Startup founders are busy building products and don't have time for social media
-        - Rooki is an AI intern that learns the business's voice and monitors trends 24/7
-        - Rooki sends important alerts via Telegram and handles email requests for longer content
-
-    Refer to the detected tone but use varied phrasing and natural language. Here is an example:
-    - "Based on your request for a [detected tone] approach, here's a draft:"
-    - "For a more [detected tone] style, consider this:"
-    - "Taking a [detected tone] direction as requested:"
-    
-    STRICT REQUIREMENT: Your refined tweet must be UNIQUE and clearly reflect the specific voice profile.
-    DO NOT mention "voice profile" in your response.
-    DO NOT use generic templates or standard marketing language.
-    DO NOT use hash tags.
-    DO NOT return a fixed template. Make sure your response is unique and personalized to:
-    1. The user's specific voice profile retrieved from the database
-    2. The specific user message: "{user_message}"
-    data."
-  temperature: 0.7
+    Refine an existing TweetDraft@v1 using TweetContext@v1 and user_feedback (from context).
+    Align with voice_profile if present; otherwise use insights_summary.
+    Respect brand_constraints; keep under constraints.max_chars (default 280).
+    Return ONLY valid TweetDraft@v1 JSON.
+  temperature: 0.6
   top_p: 0.9
-  expected_output: "str"
+  expected_output: "TweetDraft@v1"
   agent: "tweet_refine_agent"
+  requires: ["get_tweet_context", "draft_demo_tweet"]

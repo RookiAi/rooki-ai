@@ -13,6 +13,7 @@ dependencies = [
     "emoji>=2.0.0",
     "psycopg2-binary>=2.9.10",
     "asyncpg>=0.30.0",
+    "dedalus-labs>=0.1.0a8",
 ]
 
 [project.scripts]

@@ -1,8 +1,9 @@
 from .get_trending_tweets_tool import GetTrendingTweetsTool
 from .json_schema_validator_tool import JSONSchemaValidatorTool
-from .supabase_get_voice_tool import SuperbaseGetVoiceTool
+from .supabase_get_voice_tool import SupabaseGetVoiceTool
 from .supabase_user_tweets_storage_url_tool import SupabaseUserTweetsStorageUrlTool
 from .tweet_history_storage_tool import TweetHistoryStorageTool
+from .tweet_mcp_tool import TweetMCPTool
 
 # from .jsonl_reader_tool import JSONLReaderTool
 # from .text_normalize_tool import TextNormalizeTool
@@ -36,7 +37,8 @@ __all__ = [
     "SupabaseUserTweetsStorageUrlTool",
     "JSONSchemaValidatorTool",
     "GetTrendingTweetsTool",
-    "SuperbaseGetVoiceTool",
+    "SupabaseGetVoiceTool",
+    "TweetMCPTool",
     # "JSONLReaderTool",
     # "TextNormalizeTool",
     # "StyleMetricsTool",

@@ -771,6 +771,23 @@ wheels = [
 ]
 
 [[package]]
+name = "dedalus-labs"
+version = "0.1.0a8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/18/6c/6bddc6e9244964bdcaa940d79802ba35e20e01d44aafafd91d25f5ebef1f/dedalus_labs-0.1.0a8.tar.gz", hash = "sha256:6f152b35b94ad3aad5aed2c68c7ebae101b6eef68be23caab46f6526a554b976", size = 122166, upload-time = "2025-08-21T20:20:41.492Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bf/ea/797715adbefc7f973bc805fc4efad1b49ce74d6e214509706ddc71320e7d/dedalus_labs-0.1.0a8-py3-none-any.whl", hash = "sha256:f9e5945dd69a6c78c2bc1442829346ceedfcacaa947a39bfab6e97df71b52081", size = 110821, upload-time = "2025-08-21T20:20:40.194Z" },
+]
+
+[[package]]
 name = "deprecation"
 version = "2.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3851,6 +3868,7 @@ source = { editable = "." }
 dependencies = [
     { name = "asyncpg" },
     { name = "crewai", extra = ["tools"] },
+    { name = "dedalus-labs" },
     { name = "emoji" },
     { name = "fastapi", extra = ["standard"] },
     { name = "httpx" },
@@ -3863,6 +3881,7 @@ dependencies = [
 requires-dist = [
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "crewai", extras = ["tools"], specifier = ">=0.165.1,<1.0.0" },
+    { name = "dedalus-labs", specifier = ">=0.1.0a8" },
     { name = "emoji", specifier = ">=2.0.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.109.0" },
     { name = "httpx", specifier = ">=0.24.0" },

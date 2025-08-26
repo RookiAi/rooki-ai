@@ -60,11 +60,6 @@ class CoachFlow(Flow[CoachState]):
         context = route_with_context["context"]
         user_id = getattr(self.state, "user_id", None)
 
-        print(f"Selected agent: {route_obj}")
-
-        # Debug the exact value and type of route_obj
-        print(f"Selected agent: '{route_obj}' (type: {type(route_obj)})")
-
         # Strip whitespace and normalize to handle potential format issues
         if hasattr(route_obj, "raw"):
             route = str(route_obj.raw).strip().lower()
@@ -91,15 +86,13 @@ class CoachFlow(Flow[CoachState]):
         Handle category-specific content execution via a crew.
         """
         try:
-            print(f"Executing category agent crew for user {user_id}")
             user_message = context.get("user_message", "")
-            print(f"User message: {user_message}")
-
             # Create and execute the category crew
-            crew = CategoryDraftCrew()
-            result = crew.crew().kickoff(
-                inputs={"user_id": user_id, "user_message": user_message}
-            )
+            inputs = {
+                "user_id": user_id,
+                "user_message": user_message,
+            }
+            result = CategoryDraftCrew(inputs).crew().kickoff(inputs=inputs)
 
             # Handle various result types
             if result is None:

@@ -13,14 +13,14 @@ from pydantic import Field
 load_dotenv()
 
 
-class SuperbaseGetVoiceTool(BaseTool):
+class SupabaseGetVoiceTool(BaseTool):
     """Tool for querying Supabase to get user's voice.
 
     This tool connects to a Supabase database and queries the voice table
     to find the storage_url for a given user_id.
     """
 
-    name: str = "SuperbaseGetVoiceTool"
+    name: str = "SupabaseGetVoiceTool"
     description: str = "Get user's voice storage URL from Supabase for a user_id"
 
     def _get_env_var(self, var_name, default=None):
