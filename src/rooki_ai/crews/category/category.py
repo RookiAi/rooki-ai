@@ -148,7 +148,7 @@ class CategoryDraftCrew:
             2. Generate an `insights_summary` field: 2-4 sentences synthesizing patterns relevant to the user_message
             3. Return ONLY valid TweetContext@v1 JSON
             
-            The agent has access to the TweetMCPTool that can be used like this:
+            The agent has access to the TweetMCPTool that can be used like this, try at most 3 times:
             ```
             Thought: I need to generate tweet examples to understand patterns
             Action: TweetMCPTool
